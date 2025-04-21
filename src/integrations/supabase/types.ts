@@ -9,7 +9,166 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      inquiries: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          phone: string
+          product_id: string
+          quantity: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phone: string
+          product_id: string
+          quantity: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          product_id?: string
+          quantity?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_specifications: {
+        Row: {
+          beam_angle: string | null
+          body_material: string | null
+          brand: string | null
+          created_at: string
+          driver_area_size: string | null
+          frequency: string | null
+          id: string
+          input_voltage: string | null
+          ip_rating: string | null
+          item_weight: string | null
+          lighting_type: string | null
+          min_order_quantity: number | null
+          pcb_area_size: string | null
+          phase: string | null
+          power: string | null
+          updated_at: string
+          usage_application: string | null
+        }
+        Insert: {
+          beam_angle?: string | null
+          body_material?: string | null
+          brand?: string | null
+          created_at?: string
+          driver_area_size?: string | null
+          frequency?: string | null
+          id?: string
+          input_voltage?: string | null
+          ip_rating?: string | null
+          item_weight?: string | null
+          lighting_type?: string | null
+          min_order_quantity?: number | null
+          pcb_area_size?: string | null
+          phase?: string | null
+          power?: string | null
+          updated_at?: string
+          usage_application?: string | null
+        }
+        Update: {
+          beam_angle?: string | null
+          body_material?: string | null
+          brand?: string | null
+          created_at?: string
+          driver_area_size?: string | null
+          frequency?: string | null
+          id?: string
+          input_voltage?: string | null
+          ip_rating?: string | null
+          item_weight?: string | null
+          lighting_type?: string | null
+          min_order_quantity?: number | null
+          pcb_area_size?: string | null
+          phase?: string | null
+          power?: string | null
+          updated_at?: string
+          usage_application?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          color: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          is_active: boolean
+          material: string
+          name: string
+          price: string | null
+          shape: string
+          specifications_id: string | null
+          updated_at: string
+          wattage: number
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          material: string
+          name: string
+          price?: string | null
+          shape: string
+          specifications_id?: string | null
+          updated_at?: string
+          wattage: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          material?: string
+          name?: string
+          price?: string | null
+          shape?: string
+          specifications_id?: string | null
+          updated_at?: string
+          wattage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_specifications_id_fkey"
+            columns: ["specifications_id"]
+            isOneToOne: false
+            referencedRelation: "product_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
