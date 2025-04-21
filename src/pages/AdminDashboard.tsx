@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/com
 import { products, Product, inquiries } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
 import ProductForm from '@/components/admin/ProductForm';
+import HeroSettings from '@/components/admin/HeroSettings';
 
 const AdminDashboard = () => {
   const [productsList, setProductsList] = useState<Product[]>(products);
@@ -48,7 +48,6 @@ const AdminDashboard = () => {
   
   const handleProductSubmit = (productData: Partial<Product>) => {
     if (currentProduct) {
-      // Update existing product
       setProductsList(prev => 
         prev.map(product => 
           product.id === currentProduct.id ? { ...product, ...productData } : product
@@ -63,7 +62,6 @@ const AdminDashboard = () => {
         description: `${productData.name} has been updated successfully`,
       });
     } else {
-      // Add new product
       const newProduct: Product = {
         id: Date.now().toString(),
         name: productData.name || 'New Product',
@@ -174,11 +172,16 @@ const AdminDashboard = () => {
         </div>
         
         {/* Tabs for Products and Inquiries */}
-        <Tabs defaultValue="inquiries">
+        <Tabs defaultValue="hero">
           <TabsList className="mb-6">
+            <TabsTrigger value="hero">Hero Section</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="hero">
+            <HeroSettings />
+          </TabsContent>
           
           <TabsContent value="inquiries">
             <Card>
