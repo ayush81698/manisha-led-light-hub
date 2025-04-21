@@ -36,8 +36,8 @@ const HeroSection = () => {
         };
       case 'video':
         return { 
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'relative' as const,
+          overflow: 'hidden' as const,
           backgroundColor: '#000'
         };
       default:

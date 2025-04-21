@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { HeroSettings } from '@/lib/types';
+import type { HeroSettings as HeroSettingsType } from '@/lib/types';
 
 const HeroSettings = () => {
-  const [settings, setSettings] = useState<HeroSettings>({
+  const [settings, setSettings] = useState<HeroSettingsType>({
     backgroundType: 'color',
     backgroundValue: '#0047AB'
   });
