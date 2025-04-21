@@ -1,7 +1,8 @@
 
-import React, { useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { Card } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -14,56 +15,35 @@ interface ProductCarouselProps {
 }
 
 const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const controls = useAnimation();
-
-  useEffect(() => {
-    const rotateCarousel = async () => {
-      await controls.start({
-        rotateY: [0, 360],
-        transition: {
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear"
-        }
-      });
-    };
-
-    rotateCarousel();
-  }, [controls]);
-
+  const navigate = useNavigate();
+  
   return (
-    <div className="relative h-[400px] w-full overflow-hidden my-8">
-      <motion.div
-        ref={containerRef}
-        animate={controls}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 preserve-3d"
-        style={{ perspective: "1000px" }}
-      >
-        {products.map((product, index) => {
-          const angle = (index / products.length) * 360;
-          const radius = 200;
-          
-          return (
-            <Card
-              key={product.id}
-              className="absolute w-48 h-48 -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-transform"
-              style={{
-                transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-              }}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {products.map((product) => (
+        <Card 
+          key={product.id}
+          className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+        >
+          <div className="h-48 bg-gray-100 flex items-center justify-center">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-40 w-auto object-contain"
+            />
+          </div>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-semibold">{product.name}</h3>
+          </CardContent>
+          <CardFooter className="p-4 pt-0 flex justify-center">
+            <Button 
+              onClick={() => navigate(`/products/${product.id}`)}
+              className="bg-primary text-white hover:bg-primary/90"
             >
-              <div className="w-full h-full p-4 flex flex-col items-center justify-center">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-32 h-32 object-contain mb-2"
-                />
-                <p className="text-sm font-medium text-center">{product.name}</p>
-              </div>
-            </Card>
-          );
-        })}
-      </motion.div>
+              View Details
+            </Button>
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   );
 };

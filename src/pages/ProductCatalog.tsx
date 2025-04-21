@@ -1,13 +1,16 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { products, Product } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const ProductCatalog = () => {
+  const navigate = useNavigate();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [filters, setFilters] = useState({
     wattageRange: [0, 50],
@@ -72,6 +75,10 @@ const ProductCatalog = () => {
       materials: []
     });
     setFilteredProducts(products);
+  };
+
+  const handleProductClick = (productId: string) => {
+    navigate(`/products/${productId}`);
   };
   
   return (
@@ -167,7 +174,35 @@ const ProductCatalog = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
+                <Card 
+                  key={product.id} 
+                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                  onClick={() => handleProductClick(product.id)}
+                >
+                  <div className="h-48 bg-gray-100 flex items-center justify-center">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-40 w-auto object-contain"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-primary font-medium">{product.wattage}W</span>
+                      <Button 
+                        size="sm" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductClick(product.id);
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

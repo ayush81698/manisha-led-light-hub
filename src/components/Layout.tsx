@@ -2,6 +2,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Phone } from 'lucide-react';
+import { themeColors } from '@/lib/theme-colors';
 
 const Layout = () => {
   const location = useLocation();
@@ -13,6 +14,9 @@ const Layout = () => {
         <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <Link to="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-white font-bold text-xl">
+                ME
+              </div>
               <span className="text-2xl font-bold text-primary">Manisha Enterprises</span>
             </Link>
 
@@ -74,10 +78,10 @@ const Layout = () => {
               <div>
                 <h4 className="text-lg font-semibold mb-4">Products</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-white">Round Housings</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white">Square Housings</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white">Street Light Casings</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white">Custom Designs</a></li>
+                  <li><Link to="/products" className="text-gray-400 hover:text-white">Round Housings</Link></li>
+                  <li><Link to="/products" className="text-gray-400 hover:text-white">Square Housings</Link></li>
+                  <li><Link to="/products" className="text-gray-400 hover:text-white">Street Light Casings</Link></li>
+                  <li><Link to="/products" className="text-gray-400 hover:text-white">Custom Designs</Link></li>
                 </ul>
               </div>
               <div>
