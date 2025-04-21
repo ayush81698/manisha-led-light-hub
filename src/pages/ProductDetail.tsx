@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { products } from '@/data/products';
+import { products, inquiries } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
 
 const ProductDetail = () => {
@@ -41,6 +41,21 @@ const ProductDetail = () => {
     }
     
     // In a real app, this would send the inquiry to your backend
+    // For now, we'll add it to our local inquiries array
+    const newInquiry = {
+      id: Date.now().toString(),
+      productId: product.id,
+      productName: product.name,
+      quantity: parseInt(quantity),
+      phone,
+      notes: notes || "",
+      status: "New",
+      date: new Date().toLocaleDateString()
+    };
+    
+    // Add to inquiries (in a real app, this would be an API call)
+    inquiries.push(newInquiry);
+    
     toast({
       title: "Inquiry Submitted",
       description: "We'll contact you shortly regarding your inquiry.",
@@ -56,6 +71,7 @@ const ProductDetail = () => {
     { label: 'Wattage', value: `${product.wattage}W` },
     { label: 'Shape', value: product.shape },
     { label: 'Material', value: product.material },
+    { label: 'Color', value: product.color },
     // In a real application, these would come from the product_specifications table
     { label: 'Minimum Order Quantity', value: '50 units' },
     { label: 'Usage/Application', value: 'Indoor/Outdoor Lighting' },
@@ -151,7 +167,7 @@ const ProductDetail = () => {
                     rows={3}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                <Button type="submit" className="w-full bg-secondary text-primary hover:bg-secondary/90">
                   Submit Inquiry
                 </Button>
               </form>

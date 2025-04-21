@@ -1,23 +1,31 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Phone } from 'lucide-react';
+import { Phone, Menu, X, Lightbulb } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { themeColors } from '@/lib/theme-colors';
 
 const Layout = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.includes('/admin');
 
+  const handleContactSales = () => {
+    const phoneNumber = '+919876543210';
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {!isAdminRoute && (
         <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/80 flex items-center justify-center text-white font-bold text-xl">
-                ME
-              </div>
-              <span className="text-2xl font-bold text-primary">Manisha Enterprises</span>
+              <img 
+                src="/lovable-uploads/d594515a-74c6-44af-923c-a56371ce48f8.png" 
+                alt="Manisha Enterprises Logo" 
+                className="h-14"
+              />
             </Link>
 
             <nav className="hidden md:flex space-x-6">
@@ -27,27 +35,55 @@ const Layout = () => {
               <Link to="/products" className={`font-medium hover:text-primary ${location.pathname === '/products' ? 'text-primary' : 'text-gray-600'}`}>
                 Products
               </Link>
-              <a href="#about" className="font-medium text-gray-600 hover:text-primary">
+              <Link to="/about" className={`font-medium hover:text-primary ${location.pathname === '/about' ? 'text-primary' : 'text-gray-600'}`}>
                 About
-              </a>
-              <a href="#contact" className="font-medium text-gray-600 hover:text-primary">
+              </Link>
+              <Link to="/contact" className={`font-medium hover:text-primary ${location.pathname === '/contact' ? 'text-primary' : 'text-gray-600'}`}>
                 Contact
-              </a>
+              </Link>
               <Link to="/admin" className="font-medium text-gray-600 hover:text-primary">
                 Admin
               </Link>
             </nav>
 
-            <div className="hidden md:flex items-center space-x-2">
-              <Phone size={18} className="text-primary" />
-              <span className="text-gray-700 font-medium">+91 9876543210</span>
+            <div className="hidden md:flex items-center space-x-4">
+              <Button onClick={handleContactSales} className="bg-secondary text-primary hover:bg-secondary/90">
+                <Phone size={18} className="mr-2" />
+                Contact Sales
+              </Button>
             </div>
 
-            <button className="md:hidden text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu size={24} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[80%] sm:w-[300px]">
+                <div className="flex flex-col h-full py-6">
+                  <div className="mb-8">
+                    <img 
+                      src="/lovable-uploads/d594515a-74c6-44af-923c-a56371ce48f8.png" 
+                      alt="Manisha Enterprises Logo" 
+                      className="h-12 mb-6"
+                    />
+                  </div>
+                  <nav className="flex flex-col space-y-4">
+                    <Link to="/" className="px-2 py-1 rounded hover:bg-gray-100">Home</Link>
+                    <Link to="/products" className="px-2 py-1 rounded hover:bg-gray-100">Products</Link>
+                    <Link to="/about" className="px-2 py-1 rounded hover:bg-gray-100">About</Link>
+                    <Link to="/contact" className="px-2 py-1 rounded hover:bg-gray-100">Contact</Link>
+                    <Link to="/admin" className="px-2 py-1 rounded hover:bg-gray-100">Admin</Link>
+                  </nav>
+                  <div className="mt-auto">
+                    <Button onClick={handleContactSales} className="w-full bg-secondary text-primary hover:bg-secondary/90">
+                      <Phone size={18} className="mr-2" />
+                      Contact Sales
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </header>
       )}
@@ -57,36 +93,36 @@ const Layout = () => {
       </main>
 
       {!isAdminRoute && (
-        <footer className="bg-gray-900 text-white">
+        <footer className="bg-primary text-white">
           <div className="container mx-auto px-4 py-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
                 <h3 className="text-xl font-bold mb-4">Manisha Enterprises</h3>
-                <p className="text-gray-400">
+                <p className="text-gray-300">
                   Specializing in high-quality LED light housings for industrial and commercial applications.
                 </p>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
                 <ul className="space-y-2">
-                  <li><Link to="/" className="text-gray-400 hover:text-white">Home</Link></li>
-                  <li><Link to="/products" className="text-gray-400 hover:text-white">Products</Link></li>
-                  <li><a href="#about" className="text-gray-400 hover:text-white">About Us</a></li>
-                  <li><a href="#contact" className="text-gray-400 hover:text-white">Contact</a></li>
+                  <li><Link to="/" className="text-gray-300 hover:text-white">Home</Link></li>
+                  <li><Link to="/products" className="text-gray-300 hover:text-white">Products</Link></li>
+                  <li><Link to="/about" className="text-gray-300 hover:text-white">About Us</Link></li>
+                  <li><Link to="/contact" className="text-gray-300 hover:text-white">Contact</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Products</h4>
                 <ul className="space-y-2">
-                  <li><Link to="/products" className="text-gray-400 hover:text-white">Round Housings</Link></li>
-                  <li><Link to="/products" className="text-gray-400 hover:text-white">Square Housings</Link></li>
-                  <li><Link to="/products" className="text-gray-400 hover:text-white">Street Light Casings</Link></li>
-                  <li><Link to="/products" className="text-gray-400 hover:text-white">Custom Designs</Link></li>
+                  <li><Link to="/products" className="text-gray-300 hover:text-white">Round Housings</Link></li>
+                  <li><Link to="/products" className="text-gray-300 hover:text-white">Square Housings</Link></li>
+                  <li><Link to="/products" className="text-gray-300 hover:text-white">Street Light Casings</Link></li>
+                  <li><Link to="/products" className="text-gray-300 hover:text-white">Custom Designs</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Contact</h4>
-                <address className="text-gray-400 not-italic">
+                <address className="text-gray-300 not-italic">
                   123 Industrial Area, <br />
                   Mumbai, India <br />
                   <a href="tel:+919876543210" className="hover:text-white">+91 9876543210</a> <br />
@@ -94,7 +130,7 @@ const Layout = () => {
                 </address>
               </div>
             </div>
-            <div className="mt-12 pt-8 border-t border-gray-800 text-gray-400 text-center">
+            <div className="mt-12 pt-8 border-t border-gray-800 text-gray-300 text-center">
               <p>&copy; {new Date().getFullYear()} Manisha Enterprises. All rights reserved.</p>
             </div>
           </div>

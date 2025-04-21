@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11.2%;
 
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 80% 15%; /* Dark Blue #0e2941 */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 45 100% 51%; /* Yellow #ffc107 */
+    --secondary-foreground: 210 80% 15%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 221.2 83.2% 63.3%;
+    --accent: 210 100% 97%; /* Light blue accent */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,31 +31,31 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 210 80% 15%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 210 80% 10%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 210 80% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 210 80% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 210 80% 15%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 45 100% 51%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 91.2% 59.8%;
+    --accent: 210 100% 97%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
@@ -82,9 +82,17 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(30, 64, 175, 0.4) 100%);
+  background: linear-gradient(135deg, rgba(14, 41, 65, 0.1) 0%, rgba(14, 41, 65, 0.4) 100%);
 }
 
 .nav-gradient {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(30, 64, 175, 0.05), rgba(255, 255, 255, 0.1));
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(14, 41, 65, 0.05), rgba(255, 255, 255, 0.1));
+}
+
+.btn-primary {
+  @apply bg-[#0e2941] text-white hover:bg-[#0a1f31];
+}
+
+.btn-secondary {
+  @apply bg-[#ffc107] text-[#0e2941] hover:bg-[#ffc107]/90;
 }

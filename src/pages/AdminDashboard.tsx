@@ -5,12 +5,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { products, Product, inquiries } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
+import ProductForm from '@/components/admin/ProductForm';
 
 const AdminDashboard = () => {
   const [productsList, setProductsList] = useState<Product[]>(products);
   const [inquiriesList, setInquiriesList] = useState(inquiries);
+  const [isNewProductOpen, setIsNewProductOpen] = useState(false);
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   
   const handleStatusChange = (inquiryId: string, newStatus: string) => {
     setInquiriesList(prev => 
@@ -39,6 +44,51 @@ const AdminDashboard = () => {
       title: "Status Updated",
       description: `Product is now ${newStatus}`,
     });
+  };
+  
+  const handleProductSubmit = (productData: Partial<Product>) => {
+    if (currentProduct) {
+      // Update existing product
+      setProductsList(prev => 
+        prev.map(product => 
+          product.id === currentProduct.id ? { ...product, ...productData } : product
+        )
+      );
+      
+      setIsEditProductOpen(false);
+      setCurrentProduct(null);
+      
+      toast({
+        title: "Product Updated",
+        description: `${productData.name} has been updated successfully`,
+      });
+    } else {
+      // Add new product
+      const newProduct: Product = {
+        id: Date.now().toString(),
+        name: productData.name || 'New Product',
+        description: productData.description || 'No description',
+        wattage: productData.wattage || 5,
+        shape: productData.shape || 'Round',
+        material: productData.material || 'Aluminum',
+        color: productData.color || 'Silver',
+        image: productData.image || '/placeholder.svg',
+        isActive: true,
+      };
+      
+      setProductsList(prev => [...prev, newProduct]);
+      setIsNewProductOpen(false);
+      
+      toast({
+        title: "Product Created",
+        description: `${newProduct.name} has been added successfully`,
+      });
+    }
+  };
+  
+  const handleEditProduct = (product: Product) => {
+    setCurrentProduct(product);
+    setIsEditProductOpen(true);
   };
   
   const getStatusColor = (status: string) => {
@@ -191,7 +241,7 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Product Management</CardTitle>
-                <Button size="sm">Add New Product</Button>
+                <Button size="sm" onClick={() => setIsNewProductOpen(true)}>Add New Product</Button>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -241,7 +291,13 @@ const AdminDashboard = () => {
                               >
                                 {product.isActive ? 'Deactivate' : 'Activate'}
                               </Button>
-                              <Button variant="outline" size="sm">Edit</Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleEditProduct(product)}
+                              >
+                                Edit
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -254,6 +310,42 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* New Product Sheet */}
+      <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
+        <SheetContent side="right" className="w-full md:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add New Product</SheetTitle>
+          </SheetHeader>
+          <div className="py-4">
+            <ProductForm
+              onSubmit={handleProductSubmit}
+              onCancel={() => setIsNewProductOpen(false)}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      {/* Edit Product Sheet */}
+      <Sheet open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
+        <SheetContent side="right" className="w-full md:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Edit Product</SheetTitle>
+          </SheetHeader>
+          <div className="py-4">
+            {currentProduct && (
+              <ProductForm
+                product={currentProduct}
+                onSubmit={handleProductSubmit}
+                onCancel={() => {
+                  setIsEditProductOpen(false);
+                  setCurrentProduct(null);
+                }}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
