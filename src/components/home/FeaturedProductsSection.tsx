@@ -1,0 +1,87 @@
+
+import React, { useEffect, useState } from 'react';
+import ProductCarousel from './ProductCarousel';
+import { SectionSettings } from '@/lib/types';
+
+interface FeaturedProductsSectionProps {
+  products: any[];
+}
+
+const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products }) => {
+  const [settings, setSettings] = useState<SectionSettings>({
+    backgroundType: 'color',
+    backgroundValue: '#f9fafb'
+  });
+
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('featuredSettings');
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Error parsing featured settings:', error);
+      }
+    }
+  }, []);
+
+  const getBackgroundStyle = () => {
+    switch (settings.backgroundType) {
+      case 'color':
+        return { background: settings.backgroundValue };
+      case 'image':
+        return { 
+          backgroundImage: `url(${settings.backgroundValue})`,
+          backgroundSize: 'cover' as const,
+          backgroundPosition: 'center' as const,
+          position: 'relative' as const,
+        };
+      case 'video':
+        return { 
+          position: 'relative' as const,
+          overflow: 'hidden' as const,
+          backgroundColor: '#000',
+          minHeight: '500px' as const
+        };
+      default:
+        return { background: '#f9fafb' };
+    }
+  };
+
+  return (
+    <section className="py-16 relative" style={getBackgroundStyle()}>
+      {settings.backgroundType === 'image' && (
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      )}
+      
+      {settings.backgroundType === 'video' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <iframe
+            className="w-full h-full"
+            src={`https://www.youtube.com/embed/${settings.backgroundValue}?autoplay=1&mute=1&controls=0&loop=1&playlist=${settings.backgroundValue}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ 
+              position: 'absolute', 
+              top: '50%', 
+              left: '50%', 
+              transform: 'translate(-50%, -50%)', 
+              width: '100vw', 
+              height: '100vh', 
+              pointerEvents: 'none' 
+            }}
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        </div>
+      )}
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <h2 className={`text-3xl font-bold text-center mb-12 ${(settings.backgroundType === 'image' || settings.backgroundType === 'video') ? 'text-white' : 'text-gray-900'}`}>
+          Featured Products
+        </h2>
+        <ProductCarousel products={products} />
+      </div>
+    </section>
+  );
+};
+
+export default FeaturedProductsSection;

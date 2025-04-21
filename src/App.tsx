@@ -12,6 +12,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import ContactOptions from "./pages/ContactOptions";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 
@@ -33,6 +34,7 @@ const App: React.FC = () => {
                 <Route path="/products/:productId" element={<ProductDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/contact-options" element={<ContactOptions />} />
                 <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="*" element={<NotFound />} />

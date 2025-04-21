@@ -15,13 +15,16 @@ const HeroSection = () => {
   useEffect(() => {
     const savedSettings = localStorage.getItem('heroSettings');
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Error parsing hero settings:', error);
+      }
     }
   }, []);
 
   const handleContactSales = () => {
-    const phoneNumber = '+919876543210';
-    window.location.href = `tel:${phoneNumber}`;
+    navigate('/contact-options');
   };
 
   const getBackgroundStyle = () => {
@@ -31,8 +34,8 @@ const HeroSection = () => {
       case 'image':
         return { 
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${settings.backgroundValue})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundSize: 'cover' as const,
+          backgroundPosition: 'center' as const
         };
       case 'video':
         return { 

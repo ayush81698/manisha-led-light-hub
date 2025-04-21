@@ -7,38 +7,38 @@ import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ColorPicker } from 'lucide-react';
-import type { HeroSettings as HeroSettingsType } from '@/lib/types';
+import type { SectionSettings } from '@/lib/types';
 
-const HeroSettings = () => {
-  const [settings, setSettings] = useState<HeroSettingsType>({
+const FeaturedSettings = () => {
+  const [settings, setSettings] = useState<SectionSettings>({
     backgroundType: 'color',
-    backgroundValue: '#0047AB'
+    backgroundValue: '#f9fafb'
   });
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem('heroSettings');
+    const savedSettings = localStorage.getItem('featuredSettings');
     if (savedSettings) {
       try {
         setSettings(JSON.parse(savedSettings));
       } catch (error) {
-        console.error('Error parsing hero settings:', error);
+        console.error('Error parsing featured settings:', error);
       }
     }
   }, []);
 
   const handleSave = () => {
     // In a real app, this would save to a database
-    localStorage.setItem('heroSettings', JSON.stringify(settings));
+    localStorage.setItem('featuredSettings', JSON.stringify(settings));
     toast({
       title: "Settings saved",
-      description: "Hero section settings have been updated successfully."
+      description: "Featured products section settings have been updated successfully."
     });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Hero Section Settings</CardTitle>
+        <CardTitle>Featured Products Section Settings</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -49,16 +49,16 @@ const HeroSettings = () => {
             }
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="color" id="color" />
-              <Label htmlFor="color">Color</Label>
+              <RadioGroupItem value="color" id="featured-color" />
+              <Label htmlFor="featured-color">Color</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="image" id="image" />
-              <Label htmlFor="image">Image URL</Label>
+              <RadioGroupItem value="image" id="featured-image" />
+              <Label htmlFor="featured-image">Image URL</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="video" id="video" />
-              <Label htmlFor="video">YouTube Video ID</Label>
+              <RadioGroupItem value="video" id="featured-video" />
+              <Label htmlFor="featured-video">YouTube Video ID</Label>
             </div>
           </RadioGroup>
         </div>
@@ -101,4 +101,4 @@ const HeroSettings = () => {
   );
 };
 
-export default HeroSettings;
+export default FeaturedSettings;

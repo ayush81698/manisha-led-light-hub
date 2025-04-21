@@ -9,6 +9,7 @@ import { products, Product, inquiries } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
 import ProductForm from '@/components/admin/ProductForm';
 import HeroSettings from '@/components/admin/HeroSettings';
+import FeaturedSettings from '@/components/admin/FeaturedSettings';
 
 const AdminDashboard = () => {
   const [productsList, setProductsList] = useState<Product[]>(products);
@@ -104,7 +105,6 @@ const AdminDashboard = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">Admin Dashboard</h1>
@@ -126,7 +126,6 @@ const AdminDashboard = () => {
       </header>
       
       <div className="container mx-auto px-4 py-8">
-        {/* Dashboard Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
@@ -171,16 +170,20 @@ const AdminDashboard = () => {
           </Card>
         </div>
         
-        {/* Tabs for Products and Inquiries */}
         <Tabs defaultValue="hero">
           <TabsList className="mb-6">
             <TabsTrigger value="hero">Hero Section</TabsTrigger>
+            <TabsTrigger value="featured">Featured Products Section</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
           </TabsList>
           
           <TabsContent value="hero">
             <HeroSettings />
+          </TabsContent>
+          
+          <TabsContent value="featured">
+            <FeaturedSettings />
           </TabsContent>
           
           <TabsContent value="inquiries">
@@ -314,7 +317,6 @@ const AdminDashboard = () => {
         </Tabs>
       </div>
       
-      {/* New Product Sheet */}
       <Sheet open={isNewProductOpen} onOpenChange={setIsNewProductOpen}>
         <SheetContent side="right" className="w-full md:max-w-xl overflow-y-auto">
           <SheetHeader>
@@ -329,7 +331,6 @@ const AdminDashboard = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Edit Product Sheet */}
       <Sheet open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
         <SheetContent side="right" className="w-full md:max-w-xl overflow-y-auto">
           <SheetHeader>

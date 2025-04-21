@@ -1,38 +1,45 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
-import ProductCarousel from '@/components/home/ProductCarousel';
-
-// Sample data for the carousel
-const featuredProducts = [
-  {
-    id: '1',
-    name: '5W Round Housing',
-    image: '/placeholder.svg'
-  },
-  {
-    id: '2',
-    name: '10W Square Housing',
-    image: '/placeholder.svg'
-  },
-  {
-    id: '3',
-    name: '24W Street Light Housing',
-    image: '/placeholder.svg'
-  }
-];
+import FeaturedProductsSection from '@/components/home/FeaturedProductsSection';
+import { products } from '@/data/products';
 
 const Index = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([
+    {
+      id: '1',
+      name: '5W Round Housing',
+      image: '/placeholder.svg'
+    },
+    {
+      id: '2',
+      name: '10W Square Housing',
+      image: '/placeholder.svg'
+    },
+    {
+      id: '3',
+      name: '24W Street Light Housing',
+      image: '/placeholder.svg'
+    }
+  ]);
+
+  useEffect(() => {
+    // In a real app, this would fetch active products from a database
+    const activeProducts = products.filter(p => p.isActive).slice(0, 3);
+    if (activeProducts.length > 0) {
+      setFeaturedProducts(activeProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        image: p.image
+      })));
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
       <HeroSection />
       
-      <section className="py-16 bg-neutral-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
-          <ProductCarousel products={featuredProducts} />
-        </div>
-      </section>
+      <FeaturedProductsSection products={featuredProducts} />
 
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
