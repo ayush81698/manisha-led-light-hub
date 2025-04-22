@@ -157,6 +157,7 @@ export type Database = {
           image_url: string
           is_active: boolean
           material: string
+          model_url: string | null
           name: string
           price: string | null
           shape: string
@@ -172,6 +173,7 @@ export type Database = {
           image_url: string
           is_active?: boolean
           material: string
+          model_url?: string | null
           name: string
           price?: string | null
           shape: string
@@ -187,6 +189,7 @@ export type Database = {
           image_url?: string
           is_active?: boolean
           material?: string
+          model_url?: string | null
           name?: string
           price?: string | null
           shape?: string

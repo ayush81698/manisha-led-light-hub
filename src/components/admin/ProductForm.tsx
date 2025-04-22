@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +26,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       color: 'Silver',
       images: ['/placeholder.svg'],
       is_active: true,
+      model_url: '',
       specifications: {
         min_order_quantity: 50,
         usage_application: 'Indoor/Outdoor Lighting',

@@ -54,7 +54,7 @@ const ProductDetail = () => {
             images: data.product_images?.map((img: any) => img.image_url) || [],
             image_url: data.image_url,
             price: data.price,
-            model_url: data.model_url
+            model_url: data.model_url ?? undefined, // Ensure property is always defined
           };
           
           setProduct(formattedProduct);
@@ -361,3 +361,5 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
+// ... end of file
