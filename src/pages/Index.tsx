@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturedProductsSection from '@/components/home/FeaturedProductsSection';
-import { products } from '@/data/products';
+import { fetchProducts } from '@/data/products';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const Index = () => {
   const [featuredProducts, setFeaturedProducts] = useState([
@@ -24,11 +25,25 @@ const Index = () => {
   ]);
 
   useEffect(() => {
-    // In a real app, this would fetch active products from a database
-    const activeProducts = products.filter(p => p.isActive).slice(0, 3);
-    if (activeProducts.length > 0) {
-      setFeaturedProducts(activeProducts);
-    }
+    const loadProducts = async () => {
+      try {
+        const products = await fetchProducts();
+        const activeProducts = products.filter(p => p.is_active).slice(0, 3);
+        if (activeProducts.length > 0) {
+          // Map to the format expected by FeaturedProductsSection
+          const formattedProducts = activeProducts.map(p => ({
+            id: p.id || '',
+            name: p.name,
+            images: p.images || [p.image_url || '/placeholder.svg']
+          }));
+          setFeaturedProducts(formattedProducts);
+        }
+      } catch (error) {
+        console.error('Failed to load featured products:', error);
+      }
+    };
+    
+    loadProducts();
   }, []);
 
   return (
@@ -64,6 +79,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      <WhatsAppButton />
     </div>
   );
 };

@@ -31,7 +31,77 @@ export interface Product {
   specifications_id?: string;
   specifications?: ProductSpecifications;
   images?: string[];
+  price?: string;
+  image_url?: string;
 }
+
+// Mock data for initial loading - will be replaced with DB data
+export const productsMock: Product[] = [
+  {
+    id: '1',
+    name: '5W Round Housing',
+    description: 'Premium 5W round LED housing with aluminum finish.',
+    wattage: 5,
+    shape: 'Round',
+    material: 'Aluminum',
+    color: 'Silver',
+    is_active: true,
+    images: ['/placeholder.svg'],
+    price: '₹150'
+  },
+  {
+    id: '2',
+    name: '10W Square Housing',
+    description: 'Durable 10W square LED housing for commercial applications.',
+    wattage: 10,
+    shape: 'Square',
+    material: 'Plastic',
+    color: 'White',
+    is_active: true,
+    images: ['/placeholder.svg'],
+    price: '₹250'
+  },
+  {
+    id: '3',
+    name: '24W Street Light Housing',
+    description: 'Heavy-duty 24W LED housing for outdoor street lighting.',
+    wattage: 24,
+    shape: 'Rectangular',
+    material: 'Aluminum',
+    color: 'Black',
+    is_active: true,
+    images: ['/placeholder.svg'],
+    price: '₹400'
+  }
+];
+
+// Mock inquiries data
+export const inquiriesMock = [
+  {
+    id: '1',
+    productName: '5W Round Housing',
+    quantity: 100,
+    phone: '+919876543210',
+    date: '2023-05-01',
+    status: 'New'
+  },
+  {
+    id: '2',
+    productName: '10W Square Housing',
+    quantity: 50,
+    phone: '+919876543211',
+    date: '2023-05-02',
+    status: 'Called'
+  },
+  {
+    id: '3',
+    productName: '24W Street Light Housing',
+    quantity: 25,
+    phone: '+919876543212',
+    date: '2023-05-03',
+    status: 'Ignored'
+  }
+];
 
 export async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase
@@ -49,9 +119,24 @@ export async function fetchProducts(): Promise<Product[]> {
 
   return data.map(product => ({
     ...product,
+    shape: mapShapeValue(product.shape),
     images: product.product_images?.map(img => img.image_url) || [],
     specifications: product.product_specifications
   }));
+}
+
+// Helper function to ensure shape values match our union type
+function mapShapeValue(shape: string): 'Round' | 'Square' | 'Rectangular' | 'Custom' {
+  switch (shape) {
+    case 'Round':
+      return 'Round';
+    case 'Square':
+      return 'Square';
+    case 'Rectangular':
+      return 'Rectangular';
+    default:
+      return 'Custom';
+  }
 }
 
 export async function addProduct(product: Product): Promise<Product | null> {
@@ -76,7 +161,9 @@ export async function addProduct(product: Product): Promise<Product | null> {
         material: product.material,
         color: product.color,
         is_active: product.is_active,
-        specifications_id: specData.id
+        specifications_id: specData.id,
+        image_url: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
+        price: product.price || ''
       })
       .select()
       .single();
@@ -94,7 +181,12 @@ export async function addProduct(product: Product): Promise<Product | null> {
       await supabase.from('product_images').insert(imageInserts);
     }
 
-    return productData;
+    return {
+      ...productData,
+      shape: mapShapeValue(productData.shape),
+      images: product.images,
+      specifications: product.specifications
+    };
   } catch (error) {
     console.error('Error adding product:', error);
     return null;
@@ -104,7 +196,7 @@ export async function addProduct(product: Product): Promise<Product | null> {
 export async function updateProduct(product: Product): Promise<Product | null> {
   try {
     // Update specifications first if they exist
-    if (product.specifications) {
+    if (product.specifications && product.specifications_id) {
       await supabase
         .from('product_specifications')
         .update(product.specifications)
@@ -121,7 +213,9 @@ export async function updateProduct(product: Product): Promise<Product | null> {
         shape: product.shape,
         material: product.material,
         color: product.color,
-        is_active: product.is_active
+        is_active: product.is_active,
+        image_url: product.images && product.images.length > 0 ? product.images[0] : product.image_url || '/placeholder.svg',
+        price: product.price || ''
       })
       .eq('id', product.id)
       .select()
@@ -144,7 +238,12 @@ export async function updateProduct(product: Product): Promise<Product | null> {
       await supabase.from('product_images').insert(imageInserts);
     }
 
-    return productData;
+    return {
+      ...productData,
+      shape: mapShapeValue(productData.shape),
+      images: product.images,
+      specifications: product.specifications
+    };
   } catch (error) {
     console.error('Error updating product:', error);
     return null;
@@ -156,4 +255,61 @@ export async function toggleProductStatus(productId: string, isActive: boolean):
     .from('products')
     .update({ is_active: isActive })
     .eq('id', productId);
+}
+
+export async function fetchInquiries() {
+  const { data, error } = await supabase
+    .from('inquiries')
+    .select(`
+      *,
+      products(name)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching inquiries:', error);
+    return [];
+  }
+
+  return data.map(inquiry => ({
+    id: inquiry.id,
+    productName: inquiry.products?.name || 'Unknown Product',
+    quantity: inquiry.quantity,
+    phone: inquiry.phone,
+    date: new Date(inquiry.created_at).toLocaleDateString(),
+    status: inquiry.status
+  }));
+}
+
+export async function saveInquiry(productId: string, quantity: number, phone: string) {
+  const { data, error } = await supabase
+    .from('inquiries')
+    .insert({
+      product_id: productId,
+      quantity,
+      phone,
+      status: 'New'
+    })
+    .select();
+
+  if (error) {
+    console.error('Error saving inquiry:', error);
+    return null;
+  }
+
+  return data[0];
+}
+
+export async function updateInquiryStatus(inquiryId: string, status: string) {
+  const { error } = await supabase
+    .from('inquiries')
+    .update({ status })
+    .eq('id', inquiryId);
+
+  if (error) {
+    console.error('Error updating inquiry status:', error);
+    return false;
+  }
+
+  return true;
 }

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { Product } from "@/data/products";
+import { Product, saveInquiry } from "@/data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!quantity || !phone) {
@@ -33,23 +33,34 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Inquiry Submitted",
-        description: `We've received your inquiry for ${quantity} units of ${product.name}. Our team will contact you soon.`,
-      });
-      
-      setQuantity('');
-      setPhone('');
-      setIsSubmitting(false);
-    }, 1000);
+    // Save inquiry to database
+    if (product.id) {
+      try {
+        await saveInquiry(product.id, parseInt(quantity), phone);
+        
+        toast({
+          title: "Inquiry Submitted",
+          description: `We've received your inquiry for ${quantity} units of ${product.name}. Our team will contact you soon.`,
+        });
+        
+        setQuantity('');
+        setPhone('');
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to submit inquiry. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    setIsSubmitting(false);
   };
 
   const nextImage = () => {
     if (product.images && product.images.length > 1) {
       setCurrentImageIndex((prevIndex) => 
-        prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+        prevIndex === product.images!.length - 1 ? 0 : prevIndex + 1
       );
     }
   };
@@ -57,14 +68,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const prevImage = () => {
     if (product.images && product.images.length > 1) {
       setCurrentImageIndex((prevIndex) => 
-        prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+        prevIndex === 0 ? product.images!.length - 1 : prevIndex - 1
       );
     }
   };
   
   return (
     <Card className="w-full h-full product-card-shadow rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-      <div className="h-48 bg-gray-100 flex items-center justify-center p-4 relative">
+      <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 relative">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[currentImageIndex]}
@@ -73,7 +84,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           />
         ) : (
           <img
-            src="/placeholder.svg"
+            src={product.image_url || "/placeholder.svg"}
             alt={product.name}
             className="max-h-full max-w-full object-contain"
           />
@@ -112,11 +123,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardContent className="p-5">
         <div className="mb-4">
           <div className="flex justify-between items-start mb-1">
-            <h3 className="font-semibold text-lg">{product.name}</h3>
+            <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{product.name}</h3>
             <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">{product.wattage}W</span>
           </div>
-          <p className="text-gray-600 text-sm mb-2">{product.description}</p>
-          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{product.description}</p>
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
             <div>
               <span className="font-medium">Shape: </span>
               {product.shape}
@@ -129,15 +140,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="font-medium">Color: </span>
               {product.color}
             </div>
-            {product.specifications?.beamAngle && (
+            {product.specifications?.beam_angle && (
               <div>
                 <span className="font-medium">Beam Angle: </span>
-                {product.specifications.beamAngle}
+                {product.specifications.beam_angle}
               </div>
             )}
           </div>
           <Button 
-            className="w-full mt-3 bg-secondary text-primary hover:bg-secondary/90"
+            className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-white"
             onClick={() => navigate(`/products/${product.id}`)}
           >
             View Details
@@ -146,7 +157,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         <form onSubmit={handleSubmit} className="space-y-3 mt-4">
           <div className="space-y-1">
-            <label htmlFor={`quantity-${product.id}`} className="text-sm font-medium">
+            <label htmlFor={`quantity-${product.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Bulk Order Quantity
             </label>
             <Input
@@ -161,7 +172,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
           
           <div className="space-y-1">
-            <label htmlFor={`phone-${product.id}`} className="text-sm font-medium">
+            <label htmlFor={`phone-${product.id}`} className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Your Phone Number
             </label>
             <Input
@@ -176,7 +187,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white" 
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Inquiry'}

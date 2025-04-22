@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
-import { Product } from '@/data/products';
+import { Product, ProductSpecifications } from '@/data/products';
 
 interface ProductFormProps {
   product?: Product;
@@ -26,20 +26,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       material: 'Aluminum',
       color: 'Silver',
       images: ['/placeholder.svg'],
-      isActive: true,
+      is_active: true,
       specifications: {
-        minOrderQuantity: 50,
-        usageApplication: 'Indoor/Outdoor Lighting',
+        min_order_quantity: 50,
+        usage_application: 'Indoor/Outdoor Lighting',
         brand: 'Manisha Enterprises',
-        beamAngle: '120°',
-        ipRating: 'IP65',
-        lightingType: 'LED',
-        inputVoltage: '220-240V AC',
+        beam_angle: '120°',
+        ip_rating: 'IP65',
+        lighting_type: 'LED',
+        input_voltage: '220-240V AC',
         frequency: '50-60Hz',
-        itemWeight: '0.5kg',
+        item_weight: '0.5kg',
         phase: 'Single Phase',
-        pcbAreaSize: 'Standard',
-        driverAreaSize: 'Compact',
+        pcb_area_size: 'Standard',
+        driver_area_size: 'Compact',
       }
     }
   );
@@ -62,7 +62,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       specifications: {
         ...formData.specifications,
         [name]: type === 'number' ? parseInt(value) : value,
-      }
+      } as ProductSpecifications
     });
   };
 
@@ -79,7 +79,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       specifications: {
         ...formData.specifications,
         [name]: value,
-      }
+      } as ProductSpecifications
     });
   };
 
@@ -137,37 +137,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       return;
     }
     
-    // In a real app, you would upload the image files to storage here
-    // and then save the product data to the database
-    
+    // Submit the form data
     onSubmit(formData);
-    toast({
-      title: product ? "Product Updated" : "Product Created",
-      description: `${formData.name} has been ${product ? 'updated' : 'saved'} successfully.`,
-    });
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full dark:bg-gray-800">
       <CardHeader>
-        <CardTitle>{product ? 'Edit Product' : 'Add New Product'}</CardTitle>
+        <CardTitle className="dark:text-white">{product ? 'Edit Product' : 'Add New Product'}</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Product Name *</Label>
+              <Label htmlFor="name" className="dark:text-white">Product Name *</Label>
               <Input
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="wattage">Wattage *</Label>
+              <Label htmlFor="wattage" className="dark:text-white">Wattage *</Label>
               <Input
                 id="wattage"
                 name="wattage"
@@ -176,19 +171,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                 value={formData.wattage}
                 onChange={handleChange}
                 required
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="shape">Shape *</Label>
+              <Label htmlFor="shape" className="dark:text-white">Shape *</Label>
               <Select
                 value={formData.shape}
                 onValueChange={(value) => handleSelectChange('shape', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-700 dark:text-white">
                   <SelectValue placeholder="Select shape" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-gray-700">
                   <SelectItem value="Round">Round</SelectItem>
                   <SelectItem value="Square">Square</SelectItem>
                   <SelectItem value="Rectangular">Rectangular</SelectItem>
@@ -198,15 +194,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="material">Material *</Label>
+              <Label htmlFor="material" className="dark:text-white">Material *</Label>
               <Select
                 value={formData.material}
                 onValueChange={(value) => handleSelectChange('material', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-700 dark:text-white">
                   <SelectValue placeholder="Select material" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-gray-700">
                   <SelectItem value="Aluminum">Aluminum</SelectItem>
                   <SelectItem value="Plastic">Plastic</SelectItem>
                   <SelectItem value="Steel">Steel</SelectItem>
@@ -216,19 +212,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="color">Color *</Label>
+              <Label htmlFor="color" className="dark:text-white">Color *</Label>
               <Input
                 id="color"
                 name="color"
                 value={formData.color}
                 onChange={handleChange}
                 required
+                className="dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="price" className="dark:text-white">Price</Label>
+              <Input
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="₹150"
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="description" className="dark:text-white">Description *</Label>
             <Textarea
               id="description"
               name="description"
@@ -236,15 +245,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
               onChange={handleChange}
               rows={4}
               required
+              className="dark:bg-gray-700 dark:text-white"
             />
           </div>
           
           <div className="space-y-2">
-            <Label>Product Images</Label>
+            <Label className="dark:text-white">Product Images</Label>
             <div className="flex flex-wrap gap-2 mb-2">
               {formData.images && formData.images.map((image, index) => (
                 <div key={index} className="relative group">
-                  <div className="h-20 w-20 border rounded overflow-hidden">
+                  <div className="h-20 w-20 border rounded overflow-hidden dark:border-gray-600">
                     <img
                       src={image}
                       alt={`Product image ${index + 1}`}
@@ -266,29 +276,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="image">Upload Image</Label>
+                <Label htmlFor="image" className="dark:text-white">Upload Image</Label>
                 <Input
                   id="image"
                   name="image"
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div>
-                <Label htmlFor="imageUrl">Image URL</Label>
+                <Label htmlFor="imageUrl" className="dark:text-white">Image URL</Label>
                 <div className="flex gap-2">
                   <Input
                     id="imageUrl"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                   <Button 
                     type="button" 
                     onClick={handleAddImageUrl}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 bg-yellow-500 hover:bg-yellow-600 text-white"
                   >
                     Add
                   </Button>
@@ -297,140 +309,152 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
             </div>
           </div>
 
-          <div className="pt-4 border-t">
-            <h3 className="text-lg font-medium mb-4">Product Specifications</h3>
+          <div className="pt-4 border-t dark:border-gray-700">
+            <h3 className="text-lg font-medium mb-4 dark:text-white">Product Specifications</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="minOrderQuantity">Minimum Order Quantity</Label>
+                <Label htmlFor="min_order_quantity" className="dark:text-white">Minimum Order Quantity</Label>
                 <Input
-                  id="minOrderQuantity"
-                  name="minOrderQuantity"
+                  id="min_order_quantity"
+                  name="min_order_quantity"
                   type="number"
                   min="1"
-                  value={formData.specifications?.minOrderQuantity}
+                  value={formData.specifications?.min_order_quantity}
                   onChange={handleSpecChange}
                   placeholder="E.g., 50"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="usageApplication">Usage/Application</Label>
+                <Label htmlFor="usage_application" className="dark:text-white">Usage/Application</Label>
                 <Input
-                  id="usageApplication"
-                  name="usageApplication"
-                  value={formData.specifications?.usageApplication}
+                  id="usage_application"
+                  name="usage_application"
+                  value={formData.specifications?.usage_application}
                   onChange={handleSpecChange}
                   placeholder="E.g., Indoor/Outdoor Lighting"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="brand">Brand</Label>
+                <Label htmlFor="brand" className="dark:text-white">Brand</Label>
                 <Input
                   id="brand"
                   name="brand"
                   value={formData.specifications?.brand}
                   onChange={handleSpecChange}
                   placeholder="E.g., Manisha Enterprises"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="beamAngle">Beam Angle</Label>
+                <Label htmlFor="beam_angle" className="dark:text-white">Beam Angle</Label>
                 <Input
-                  id="beamAngle"
-                  name="beamAngle"
-                  value={formData.specifications?.beamAngle}
+                  id="beam_angle"
+                  name="beam_angle"
+                  value={formData.specifications?.beam_angle}
                   onChange={handleSpecChange}
                   placeholder="E.g., 120°"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="ipRating">IP Rating</Label>
+                <Label htmlFor="ip_rating" className="dark:text-white">IP Rating</Label>
                 <Input
-                  id="ipRating"
-                  name="ipRating"
-                  value={formData.specifications?.ipRating}
+                  id="ip_rating"
+                  name="ip_rating"
+                  value={formData.specifications?.ip_rating}
                   onChange={handleSpecChange}
                   placeholder="E.g., IP65"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="lightingType">Lighting Type</Label>
+                <Label htmlFor="lighting_type" className="dark:text-white">Lighting Type</Label>
                 <Input
-                  id="lightingType"
-                  name="lightingType"
-                  value={formData.specifications?.lightingType}
+                  id="lighting_type"
+                  name="lighting_type"
+                  value={formData.specifications?.lighting_type}
                   onChange={handleSpecChange}
                   placeholder="E.g., LED"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="inputVoltage">Input Voltage</Label>
+                <Label htmlFor="input_voltage" className="dark:text-white">Input Voltage</Label>
                 <Input
-                  id="inputVoltage"
-                  name="inputVoltage"
-                  value={formData.specifications?.inputVoltage}
+                  id="input_voltage"
+                  name="input_voltage"
+                  value={formData.specifications?.input_voltage}
                   onChange={handleSpecChange}
                   placeholder="E.g., 220-240V AC"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="frequency">Frequency</Label>
+                <Label htmlFor="frequency" className="dark:text-white">Frequency</Label>
                 <Input
                   id="frequency"
                   name="frequency"
                   value={formData.specifications?.frequency}
                   onChange={handleSpecChange}
                   placeholder="E.g., 50-60Hz"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="itemWeight">Item Weight</Label>
+                <Label htmlFor="item_weight" className="dark:text-white">Item Weight</Label>
                 <Input
-                  id="itemWeight"
-                  name="itemWeight"
-                  value={formData.specifications?.itemWeight}
+                  id="item_weight"
+                  name="item_weight"
+                  value={formData.specifications?.item_weight}
                   onChange={handleSpecChange}
                   placeholder="E.g., 0.5kg"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phase">Phase</Label>
+                <Label htmlFor="phase" className="dark:text-white">Phase</Label>
                 <Input
                   id="phase"
                   name="phase"
                   value={formData.specifications?.phase}
                   onChange={handleSpecChange}
                   placeholder="E.g., Single Phase"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pcbAreaSize">PCB Area Size</Label>
+                <Label htmlFor="pcb_area_size" className="dark:text-white">PCB Area Size</Label>
                 <Input
-                  id="pcbAreaSize"
-                  name="pcbAreaSize"
-                  value={formData.specifications?.pcbAreaSize}
+                  id="pcb_area_size"
+                  name="pcb_area_size"
+                  value={formData.specifications?.pcb_area_size}
                   onChange={handleSpecChange}
                   placeholder="E.g., Standard"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="driverAreaSize">Driver Area Size</Label>
+                <Label htmlFor="driver_area_size" className="dark:text-white">Driver Area Size</Label>
                 <Input
-                  id="driverAreaSize"
-                  name="driverAreaSize"
-                  value={formData.specifications?.driverAreaSize}
+                  id="driver_area_size"
+                  name="driver_area_size"
+                  value={formData.specifications?.driver_area_size}
                   onChange={handleSpecChange}
                   placeholder="E.g., Compact"
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -438,10 +462,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
         </CardContent>
         
         <CardFooter className="flex justify-end space-x-2">
-          <Button variant="outline" type="button" onClick={onCancel}>
+          <Button variant="outline" type="button" onClick={onCancel} className="dark:text-white">
             Cancel
           </Button>
-          <Button type="submit">
+          <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white">
             {product ? 'Update Product' : 'Save Product'}
           </Button>
         </CardFooter>
