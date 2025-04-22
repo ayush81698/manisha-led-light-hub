@@ -1,243 +1,159 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 export interface ProductSpecifications {
-  minOrderQuantity?: number;
-  usageApplication?: string;
+  id?: string;
+  min_order_quantity?: number;
+  usage_application?: string;
   brand?: string;
-  beamAngle?: string;
-  ipRating?: string;
-  bodyMaterial?: string;
-  lightingType?: string;
-  inputVoltage?: string;
+  beam_angle?: string;
+  power?: string;
+  ip_rating?: string;
+  body_material?: string;
+  lighting_type?: string;
+  input_voltage?: string;
   frequency?: string;
-  itemWeight?: string;
+  item_weight?: string;
   phase?: string;
-  pcbAreaSize?: string;
-  driverAreaSize?: string;
+  pcb_area_size?: string;
+  driver_area_size?: string;
 }
 
 export interface Product {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   wattage: number;
   shape: 'Round' | 'Square' | 'Rectangular' | 'Custom';
   material: string;
   color: string;
-  images: string[]; // Changed from image to images array
-  price?: string;
-  isActive: boolean;
+  is_active: boolean;
+  specifications_id?: string;
   specifications?: ProductSpecifications;
+  images?: string[];
 }
 
-// Create a singleton instance for products state management
-class ProductsStore {
-  private static instance: ProductsStore;
-  private _products: Product[] = [
-    {
-      id: '1',
-      name: 'Round LED Housing (5W)',
-      description: 'High-durability housing ideal for surface mounting. Lightweight and UV resistant.',
-      wattage: 5,
-      shape: 'Round',
-      material: 'Polycarbonate',
-      color: 'White',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true,
-      specifications: {
-        minOrderQuantity: 50,
-        usageApplication: 'Indoor/Outdoor Lighting',
-        brand: 'Manisha Enterprises',
-        beamAngle: '120°',
-        ipRating: 'IP65',
-        lightingType: 'LED',
-        inputVoltage: '220-240V AC',
-        frequency: '50-60Hz',
-        itemWeight: '0.5kg',
-        phase: 'Single Phase',
-        pcbAreaSize: 'Standard',
-        driverAreaSize: 'Compact',
-      }
-    },
-    {
-      id: '2',
-      name: 'Square Housing (6W)',
-      description: 'Sleek housing with easy mount design. Durable for indoor applications.',
-      wattage: 6,
-      shape: 'Square',
-      material: 'Plastic body with metal ring',
-      color: 'White',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true,
-      specifications: {
-        minOrderQuantity: 50,
-        usageApplication: 'Indoor/Outdoor Lighting',
-        brand: 'Manisha Enterprises',
-        beamAngle: '120°',
-        ipRating: 'IP65',
-        lightingType: 'LED',
-        inputVoltage: '220-240V AC',
-        frequency: '50-60Hz',
-        itemWeight: '0.5kg',
-        phase: 'Single Phase',
-        pcbAreaSize: 'Standard',
-        driverAreaSize: 'Compact',
-      }
-    },
-    {
-      id: '3',
-      name: 'Street Light Casing (24W)',
-      description: 'Aluminum die-cast street light enclosure. Strong heat dissipation.',
-      wattage: 24,
-      shape: 'Rectangular',
-      material: 'Aluminum',
-      color: 'Grey',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true,
-      specifications: {
-        minOrderQuantity: 100,
-        usageApplication: 'Outdoor Street Lighting',
-        brand: 'Manisha Enterprises',
-        beamAngle: '140°',
-        ipRating: 'IP65',
-        lightingType: 'LED',
-        inputVoltage: '220-240V AC',
-        frequency: '50-60Hz',
-        itemWeight: '1.2kg',
-        phase: 'Single Phase',
-        pcbAreaSize: 'Large',
-        driverAreaSize: 'Standard',
-      }
-    },
-    {
-      id: '4',
-      name: 'Round Ceiling Light Housing (12W)',
-      description: 'Flush mount ceiling housing with heat sink design. Easy installation clips.',
-      wattage: 12,
-      shape: 'Round',
-      material: 'Polycarbonate with Aluminum',
-      color: 'White',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true
-    },
-    {
-      id: '5',
-      name: 'Square Panel Housing (18W)',
-      description: 'Premium grade panel light housing with uniform light distribution design.',
-      wattage: 18,
-      shape: 'Square',
-      material: 'Aluminum frame with acrylic diffuser',
-      color: 'Silver',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true
-    },
-    {
-      id: '6',
-      name: 'Spot Light Housing (8W)',
-      description: 'Adjustable spotlight housing with directional beam capability.',
-      wattage: 8,
-      shape: 'Round',
-      material: 'Metal',
-      color: 'Black',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true
-    },
-    {
-      id: '7',
-      name: 'Outdoor Flood Light Case (30W)',
-      description: 'Weatherproof housing for outdoor flood applications. IP65 rated design.',
-      wattage: 30,
-      shape: 'Rectangular',
-      material: 'Die-cast Aluminum',
-      color: 'Dark Grey',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true
-    },
-    {
-      id: '8',
-      name: 'Slim Panel Housing (15W)',
-      description: 'Ultra-thin panel light housing for modern ceiling installations.',
-      wattage: 15,
-      shape: 'Square',
-      material: 'Aluminum with PC diffuser',
-      color: 'White',
-      images: ['/placeholder.svg'],
-      price: 'Contact for price',
-      isActive: true
-    }
-  ];
+export async function fetchProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      product_specifications(*),
+      product_images(image_url)
+    `);
 
-  private constructor() {}
-
-  public static getInstance(): ProductsStore {
-    if (!ProductsStore.instance) {
-      ProductsStore.instance = new ProductsStore();
-    }
-    return ProductsStore.instance;
+  if (error) {
+    console.error('Error fetching products:', error);
+    return [];
   }
 
-  getProducts(): Product[] {
-    return this._products;
-  }
+  return data.map(product => ({
+    ...product,
+    images: product.product_images?.map(img => img.image_url) || [],
+    specifications: product.product_specifications
+  }));
+}
 
-  updateProduct(updatedProduct: Product): void {
-    const index = this._products.findIndex(product => product.id === updatedProduct.id);
-    if (index !== -1) {
-      this._products[index] = updatedProduct;
+export async function addProduct(product: Product): Promise<Product | null> {
+  try {
+    // First, insert specifications
+    const { data: specData, error: specError } = await supabase
+      .from('product_specifications')
+      .insert(product.specifications || {})
+      .select()
+      .single();
+
+    if (specError) throw specError;
+
+    // Then, insert product with specifications ID
+    const { data: productData, error: productError } = await supabase
+      .from('products')
+      .insert({
+        name: product.name,
+        description: product.description,
+        wattage: product.wattage,
+        shape: product.shape,
+        material: product.material,
+        color: product.color,
+        is_active: product.is_active,
+        specifications_id: specData.id
+      })
+      .select()
+      .single();
+
+    if (productError) throw productError;
+
+    // Insert images if any
+    if (product.images && product.images.length > 0) {
+      const imageInserts = product.images.map((imageUrl, index) => ({
+        product_id: productData.id,
+        image_url: imageUrl,
+        display_order: index
+      }));
+
+      await supabase.from('product_images').insert(imageInserts);
     }
-  }
 
-  addProduct(newProduct: Product): void {
-    this._products.push(newProduct);
-  }
-
-  toggleProductStatus(productId: string): void {
-    const index = this._products.findIndex(product => product.id === productId);
-    if (index !== -1) {
-      this._products[index].isActive = !this._products[index].isActive;
-    }
+    return productData;
+  } catch (error) {
+    console.error('Error adding product:', error);
+    return null;
   }
 }
 
-// Export the products singleton instance
-const productsStore = ProductsStore.getInstance();
-export const products = productsStore.getProducts();
-export const updateProduct = (product: Product) => productsStore.updateProduct(product);
-export const addProduct = (product: Product) => productsStore.addProduct(product);
-export const toggleProductStatus = (productId: string) => productsStore.toggleProductStatus(productId);
+export async function updateProduct(product: Product): Promise<Product | null> {
+  try {
+    // Update specifications first if they exist
+    if (product.specifications) {
+      await supabase
+        .from('product_specifications')
+        .update(product.specifications)
+        .eq('id', product.specifications_id);
+    }
 
-export const inquiries = [
-  {
-    id: '1',
-    productId: '1',
-    productName: 'Round LED Housing (5W)',
-    quantity: 250,
-    phone: '+91-9876543210',
-    date: '2025-04-15',
-    status: 'New'
-  },
-  {
-    id: '2',
-    productId: '3',
-    productName: 'Street Light Casing (24W)',
-    quantity: 100,
-    phone: '+91-9876543211',
-    date: '2025-04-14',
-    status: 'Called'
-  },
-  {
-    id: '3',
-    productId: '5',
-    productName: 'Square Panel Housing (18W)',
-    quantity: 500,
-    phone: '+91-9876543212',
-    date: '2025-04-10',
-    status: 'Ignored'
+    // Update product details
+    const { data: productData, error: productError } = await supabase
+      .from('products')
+      .update({
+        name: product.name,
+        description: product.description,
+        wattage: product.wattage,
+        shape: product.shape,
+        material: product.material,
+        color: product.color,
+        is_active: product.is_active
+      })
+      .eq('id', product.id)
+      .select()
+      .single();
+
+    if (productError) throw productError;
+
+    // Update images if any
+    if (product.images && product.images.length > 0) {
+      // First, delete existing images
+      await supabase.from('product_images').delete().eq('product_id', product.id);
+
+      // Then insert new images
+      const imageInserts = product.images.map((imageUrl, index) => ({
+        product_id: product.id,
+        image_url: imageUrl,
+        display_order: index
+      }));
+
+      await supabase.from('product_images').insert(imageInserts);
+    }
+
+    return productData;
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return null;
   }
-];
+}
+
+export async function toggleProductStatus(productId: string, isActive: boolean): Promise<void> {
+  await supabase
+    .from('products')
+    .update({ is_active: isActive })
+    .eq('id', productId);
+}

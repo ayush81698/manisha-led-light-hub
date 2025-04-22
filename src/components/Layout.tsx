@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Menu, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import WhatsAppButton from './WhatsAppButton';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,9 +23,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
                 <img 
-                  src="/placeholder.svg" 
+                  src="/lovable-uploads/d594515a-74c6-44af-923c-a56371ce48f8.png" 
                   alt="Manisha Enterprises Logo" 
-                  className="h-8 w-8 mr-2"
+                  className="h-10 w-auto mr-2"
                 />
                 <span className="text-xl font-bold text-primary dark:text-white">
                   Manisha Enterprises
@@ -68,11 +68,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              <Link to="/contact-options">
+              <Link to="/admin">
                 <Button
-                  className="hidden md:inline-flex bg-secondary text-primary hover:bg-secondary/90"
+                  className="hidden md:inline-flex bg-secondary text-white hover:bg-secondary/90"
                 >
-                  Contact Sales
+                  Admin Login
                 </Button>
               </Link>
               <button
@@ -84,7 +84,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
           
-          {/* Mobile menu */}
           {mobileMenuOpen && (
             <nav className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
               <div className="flex flex-col space-y-4">
@@ -137,6 +136,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
       
       <main className="flex-grow">{children}</main>
+      
+      <WhatsAppButton />
       
       <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 py-8">
