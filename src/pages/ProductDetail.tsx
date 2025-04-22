@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { products, inquiries } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -14,6 +15,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState('1');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Find the product by ID
   const product = products.find(p => p.id === productId);
@@ -27,6 +29,22 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const nextImage = () => {
+    if (product.images && product.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (product.images && product.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+      );
+    }
+  };
   
   const handleInquiry = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,12 +118,42 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Product Image */}
-        <div className="bg-white p-8 rounded-lg shadow-md flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md flex items-center justify-center relative">
           <img 
-            src={product.image} 
+            src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : '/placeholder.svg'} 
             alt={product.name} 
             className="max-h-96 object-contain"
           />
+
+          {product.images && product.images.length > 1 && (
+            <>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute left-4 bg-white bg-opacity-50 hover:bg-opacity-70"
+                onClick={prevImage}
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-4 bg-white bg-opacity-50 hover:bg-opacity-70"
+                onClick={nextImage}
+              >
+                <ChevronRight size={16} />
+              </Button>
+              <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1">
+                {product.images.map((_, index) => (
+                  <div 
+                    key={index} 
+                    className={`w-2 h-2 rounded-full cursor-pointer ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300'}`}
+                    onClick={() => setCurrentImageIndex(index)}
+                  ></div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
         
         {/* Product Info */}

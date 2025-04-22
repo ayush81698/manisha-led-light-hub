@@ -18,6 +18,15 @@ interface ProductCarouselProps {
 const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
   const navigate = useNavigate();
   
+  // Add safe check for products array
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No products available to display.</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {products.map((product) => (
@@ -27,7 +36,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
         >
           <div className="h-48 bg-gray-100 flex items-center justify-center">
             <img
-              src={product.images[0]}
+              // Add a default image fallback if images array is undefined or empty
+              src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg'}
               alt={product.name}
               className="h-40 w-auto object-contain"
             />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturedProductsSection from '@/components/home/FeaturedProductsSection';
@@ -9,17 +8,17 @@ const Index = () => {
     {
       id: '1',
       name: '5W Round Housing',
-      image: '/placeholder.svg'
+      images: ['/placeholder.svg']
     },
     {
       id: '2',
       name: '10W Square Housing',
-      image: '/placeholder.svg'
+      images: ['/placeholder.svg']
     },
     {
       id: '3',
       name: '24W Street Light Housing',
-      image: '/placeholder.svg'
+      images: ['/placeholder.svg']
     }
   ]);
 
@@ -27,11 +26,7 @@ const Index = () => {
     // In a real app, this would fetch active products from a database
     const activeProducts = products.filter(p => p.isActive).slice(0, 3);
     if (activeProducts.length > 0) {
-      setFeaturedProducts(activeProducts.map(p => ({
-        id: p.id,
-        name: p.name,
-        image: p.image
-      })));
+      setFeaturedProducts(activeProducts);
     }
   }, []);
 
