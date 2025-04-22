@@ -9,16 +9,16 @@ export const ThemeToggle: React.FC = () => {
 
   return (
     <Button 
-      variant="ghost" 
+      variant="outline" 
       size="icon" 
       onClick={toggleTheme} 
-      className="rounded-full"
+      className="rounded-full border-secondary/20 dark:border-secondary/20"
       aria-label="Toggle theme"
     >
       {theme === 'light' ? (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <Moon className="h-[1.2rem] w-[1.2rem] text-primary dark:text-secondary" />
       ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <Sun className="h-[1.2rem] w-[1.2rem] text-secondary" />
       )}
     </Button>
   );

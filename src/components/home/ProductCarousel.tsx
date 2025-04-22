@@ -22,7 +22,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No products available to display.</p>
+        <p className="text-gray-500 dark:text-gray-400">No products available to display.</p>
       </div>
     );
   }
@@ -34,7 +34,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
           key={product.id}
           className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
         >
-          <div className="h-48 bg-gray-100 flex items-center justify-center">
+          <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <img
               // Add a default image fallback if images array is undefined or empty
               src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg'}
@@ -43,7 +43,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
             />
           </div>
           <CardContent className="p-4">
-            <h3 className="text-lg font-semibold">{product.name}</h3>
+            <h3 className="text-lg font-semibold dark:text-white">{product.name}</h3>
           </CardContent>
           <CardFooter className="p-4 pt-0 flex justify-center">
             <Button 

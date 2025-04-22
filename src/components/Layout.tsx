@@ -4,10 +4,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Menu, X } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { theme } = useTheme();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -20,6 +22,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
+                <img 
+                  src="/placeholder.svg" 
+                  alt="Manisha Enterprises Logo" 
+                  className="h-8 w-8 mr-2"
+                />
                 <span className="text-xl font-bold text-primary dark:text-white">
                   Manisha Enterprises
                 </span>
@@ -29,27 +36,33 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <nav className="hidden md:flex space-x-6">
               <Link 
                 to="/" 
-                className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/') ? 'font-semibold text-primary dark:text-white' : ''}`}
               >
                 Home
               </Link>
               <Link 
                 to="/products" 
-                className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/products') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/products') ? 'font-semibold text-primary dark:text-white' : ''}`}
               >
                 Products
               </Link>
               <Link 
                 to="/about" 
-                className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/about') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/about') ? 'font-semibold text-primary dark:text-white' : ''}`}
               >
                 About
               </Link>
               <Link 
                 to="/contact-options" 
-                className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/contact-options') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/contact-options') ? 'font-semibold text-primary dark:text-white' : ''}`}
               >
                 Contact
+              </Link>
+              <Link 
+                to="/admin" 
+                className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/admin') ? 'font-semibold text-primary dark:text-white' : ''}`}
+              >
+                Admin
               </Link>
             </nav>
             
@@ -63,7 +76,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Button>
               </Link>
               <button
-                className="md:hidden text-gray-600 dark:text-gray-300"
+                className="md:hidden text-gray-600 dark:text-gray-200"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -77,31 +90,38 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <div className="flex flex-col space-y-4">
                 <Link 
                   to="/"
-                  className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                  className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/') ? 'font-semibold text-primary dark:text-white' : ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Home
                 </Link>
                 <Link 
                   to="/products"
-                  className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/products') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                  className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/products') ? 'font-semibold text-primary dark:text-white' : ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Products
                 </Link>
                 <Link 
                   to="/about"
-                  className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/about') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                  className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/about') ? 'font-semibold text-primary dark:text-white' : ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link 
                   to="/contact-options"
-                  className={`text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-white ${isActive('/contact-options') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                  className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/contact-options') ? 'font-semibold text-primary dark:text-white' : ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Contact
+                </Link>
+                <Link 
+                  to="/admin"
+                  className={`text-gray-600 dark:text-gray-200 hover:text-primary dark:hover:text-white ${isActive('/admin') ? 'font-semibold text-primary dark:text-white' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Admin
                 </Link>
                 <Link to="/contact-options" onClick={() => setMobileMenuOpen(false)}>
                   <Button

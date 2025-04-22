@@ -60,7 +60,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
   };
 
   return (
-    <section className="py-16 relative" style={getBackgroundStyle()}>
+    <section className="py-16 relative dark:bg-gray-900" style={getBackgroundStyle()}>
       {settings.backgroundType === 'image' && (
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       )}
@@ -87,7 +87,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
       )}
       
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className={`text-3xl font-bold text-center mb-12 ${(settings.backgroundType === 'image' || settings.backgroundType === 'video') ? 'text-white' : 'text-gray-900'}`}>
+        <h2 className={`text-3xl font-bold text-center mb-12 ${(settings.backgroundType === 'image' || settings.backgroundType === 'video') ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
           Featured Products
         </h2>
         <ProductCarousel products={products} />

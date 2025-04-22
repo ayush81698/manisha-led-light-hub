@@ -1,3 +1,4 @@
+
 export interface ProductSpecifications {
   minOrderQuantity?: number;
   usageApplication?: string;
@@ -186,9 +187,10 @@ class ProductsStore {
   }
 
   updateProduct(updatedProduct: Product): void {
-    this._products = this._products.map(product => 
-      product.id === updatedProduct.id ? updatedProduct : product
-    );
+    const index = this._products.findIndex(product => product.id === updatedProduct.id);
+    if (index !== -1) {
+      this._products[index] = updatedProduct;
+    }
   }
 
   addProduct(newProduct: Product): void {
@@ -196,9 +198,10 @@ class ProductsStore {
   }
 
   toggleProductStatus(productId: string): void {
-    this._products = this._products.map(product => 
-      product.id === productId ? {...product, isActive: !product.isActive} : product
-    );
+    const index = this._products.findIndex(product => product.id === productId);
+    if (index !== -1) {
+      this._products[index].isActive = !this._products[index].isActive;
+    }
   }
 }
 

@@ -46,14 +46,14 @@
     --popover: 210 80% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 80% 15%;
+    --primary: 210 80% 60%; /* Brighter blue for dark mode */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 45 100% 51%; /* Keep yellow the same in dark mode */
     --secondary-foreground: 210 80% 15%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 75.1%; /* Brighter for dark mode */
 
     --accent: 214.3 31.8% 25.4%;
     --accent-foreground: 0 0% 98%;
