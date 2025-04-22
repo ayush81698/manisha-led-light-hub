@@ -85,14 +85,14 @@ const HeroSection = () => {
           <div className="flex gap-4 justify-center">
             <Button 
               onClick={() => navigate('/products')}
-              className="bg-[#FFD700] text-[#0047AB] hover:bg-[#FFE55C]"
+              className="bg-secondary text-primary hover:bg-secondary/90"
               size="lg"
             >
               Explore Products
             </Button>
             <Button 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-[#0047AB]"
+              className="bg-secondary border-secondary text-primary hover:bg-secondary/90"
               size="lg"
               onClick={handleContactSales}
             >

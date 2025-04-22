@@ -48,7 +48,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
           <CardFooter className="p-4 pt-0 flex justify-center">
             <Button 
               onClick={() => navigate(`/products/${product.id}`)}
-              className="bg-primary text-white hover:bg-primary/90"
+              className="bg-secondary text-primary hover:bg-secondary/90"
             >
               View Details
             </Button>

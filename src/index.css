@@ -40,7 +40,7 @@
     --background: 210 80% 10%;
     --foreground: 210 40% 98%;
 
-    --card: 210 80% 10%;
+    --card: 210 80% 8%;
     --card-foreground: 210 40% 98%;
 
     --popover: 210 80% 10%;
@@ -49,14 +49,14 @@
     --primary: 210 80% 15%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 45 100% 51%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 45 100% 51%; /* Keep yellow the same in dark mode */
+    --secondary-foreground: 210 80% 15%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 210 100% 97%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 214.3 31.8% 25.4%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;

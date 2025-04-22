@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Product } from "@/data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -45,27 +47,39 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
-    );
+    if (product.images && product.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
-    );
+    if (product.images && product.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+      );
+    }
   };
   
   return (
     <Card className="w-full h-full product-card-shadow rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
       <div className="h-48 bg-gray-100 flex items-center justify-center p-4 relative">
-        <img
-          src={product.images[currentImageIndex]}
-          alt={product.name}
-          className="max-h-full max-w-full object-contain"
-        />
+        {product.images && product.images.length > 0 ? (
+          <img
+            src={product.images[currentImageIndex]}
+            alt={product.name}
+            className="max-h-full max-w-full object-contain"
+          />
+        ) : (
+          <img
+            src="/placeholder.svg"
+            alt={product.name}
+            className="max-h-full max-w-full object-contain"
+          />
+        )}
         
-        {product.images.length > 1 && (
+        {product.images && product.images.length > 1 && (
           <>
             <Button 
               variant="ghost" 
@@ -87,7 +101,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product.images.map((_, index) => (
                 <div 
                   key={index} 
-                  className={`w-2 h-2 rounded-full ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300'}`}
+                  className={`w-2 h-2 rounded-full cursor-pointer ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300'}`}
                   onClick={() => setCurrentImageIndex(index)}
                 ></div>
               ))}
@@ -115,7 +129,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="font-medium">Color: </span>
               {product.color}
             </div>
+            {product.specifications?.beamAngle && (
+              <div>
+                <span className="font-medium">Beam Angle: </span>
+                {product.specifications.beamAngle}
+              </div>
+            )}
           </div>
+          <Button 
+            className="w-full mt-3 bg-secondary text-primary hover:bg-secondary/90"
+            onClick={() => navigate(`/products/${product.id}`)}
+          >
+            View Details
+          </Button>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-3 mt-4">

@@ -1,3 +1,18 @@
+export interface ProductSpecifications {
+  minOrderQuantity?: number;
+  usageApplication?: string;
+  brand?: string;
+  beamAngle?: string;
+  ipRating?: string;
+  bodyMaterial?: string;
+  lightingType?: string;
+  inputVoltage?: string;
+  frequency?: string;
+  itemWeight?: string;
+  phase?: string;
+  pcbAreaSize?: string;
+  driverAreaSize?: string;
+}
 
 export interface Product {
   id: string;
@@ -10,6 +25,7 @@ export interface Product {
   images: string[]; // Changed from image to images array
   price?: string;
   isActive: boolean;
+  specifications?: ProductSpecifications;
 }
 
 // Create a singleton instance for products state management
@@ -26,7 +42,21 @@ class ProductsStore {
       color: 'White',
       images: ['/placeholder.svg'],
       price: 'Contact for price',
-      isActive: true
+      isActive: true,
+      specifications: {
+        minOrderQuantity: 50,
+        usageApplication: 'Indoor/Outdoor Lighting',
+        brand: 'Manisha Enterprises',
+        beamAngle: '120°',
+        ipRating: 'IP65',
+        lightingType: 'LED',
+        inputVoltage: '220-240V AC',
+        frequency: '50-60Hz',
+        itemWeight: '0.5kg',
+        phase: 'Single Phase',
+        pcbAreaSize: 'Standard',
+        driverAreaSize: 'Compact',
+      }
     },
     {
       id: '2',
@@ -38,7 +68,21 @@ class ProductsStore {
       color: 'White',
       images: ['/placeholder.svg'],
       price: 'Contact for price',
-      isActive: true
+      isActive: true,
+      specifications: {
+        minOrderQuantity: 50,
+        usageApplication: 'Indoor/Outdoor Lighting',
+        brand: 'Manisha Enterprises',
+        beamAngle: '120°',
+        ipRating: 'IP65',
+        lightingType: 'LED',
+        inputVoltage: '220-240V AC',
+        frequency: '50-60Hz',
+        itemWeight: '0.5kg',
+        phase: 'Single Phase',
+        pcbAreaSize: 'Standard',
+        driverAreaSize: 'Compact',
+      }
     },
     {
       id: '3',
@@ -50,7 +94,21 @@ class ProductsStore {
       color: 'Grey',
       images: ['/placeholder.svg'],
       price: 'Contact for price',
-      isActive: true
+      isActive: true,
+      specifications: {
+        minOrderQuantity: 100,
+        usageApplication: 'Outdoor Street Lighting',
+        brand: 'Manisha Enterprises',
+        beamAngle: '140°',
+        ipRating: 'IP65',
+        lightingType: 'LED',
+        inputVoltage: '220-240V AC',
+        frequency: '50-60Hz',
+        itemWeight: '1.2kg',
+        phase: 'Single Phase',
+        pcbAreaSize: 'Large',
+        driverAreaSize: 'Standard',
+      }
     },
     {
       id: '4',

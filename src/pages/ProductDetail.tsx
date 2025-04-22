@@ -85,26 +85,56 @@ const ProductDetail = () => {
     setNotes('');
   };
   
+  // Build specification list from product data
   const specificationsList = [
     { label: 'Wattage', value: `${product.wattage}W` },
     { label: 'Shape', value: product.shape },
     { label: 'Material', value: product.material },
     { label: 'Color', value: product.color },
-    // In a real application, these would come from the product_specifications table
-    { label: 'Minimum Order Quantity', value: '50 units' },
-    { label: 'Usage/Application', value: 'Indoor/Outdoor Lighting' },
-    { label: 'Brand', value: 'Manisha Enterprises' },
-    { label: 'Beam Angle', value: '120°' },
-    { label: 'IP Rating', value: 'IP65' },
-    { label: 'Body Material', value: product.material },
-    { label: 'Lighting Type', value: 'LED' },
-    { label: 'Input Voltage', value: '220-240V AC' },
-    { label: 'Frequency', value: '50-60Hz' },
-    { label: 'Item Weight', value: '0.5kg' },
-    { label: 'Phase', value: 'Single Phase' },
-    { label: 'PCB Area Size', value: 'Standard' },
-    { label: 'Driver Area Size', value: 'Compact' },
   ];
+  
+  // Add specifications from the product specifications object if it exists
+  if (product.specifications) {
+    if (product.specifications.minOrderQuantity) {
+      specificationsList.push({ label: 'Minimum Order Quantity', value: `${product.specifications.minOrderQuantity} units` });
+    }
+    if (product.specifications.usageApplication) {
+      specificationsList.push({ label: 'Usage/Application', value: product.specifications.usageApplication });
+    }
+    if (product.specifications.brand) {
+      specificationsList.push({ label: 'Brand', value: product.specifications.brand });
+    }
+    if (product.specifications.beamAngle) {
+      specificationsList.push({ label: 'Beam Angle', value: product.specifications.beamAngle });
+    }
+    if (product.specifications.ipRating) {
+      specificationsList.push({ label: 'IP Rating', value: product.specifications.ipRating });
+    }
+    if (product.specifications.bodyMaterial || product.material) {
+      specificationsList.push({ label: 'Body Material', value: product.specifications.bodyMaterial || product.material });
+    }
+    if (product.specifications.lightingType) {
+      specificationsList.push({ label: 'Lighting Type', value: product.specifications.lightingType });
+    }
+    if (product.specifications.inputVoltage) {
+      specificationsList.push({ label: 'Input Voltage', value: product.specifications.inputVoltage });
+    }
+    if (product.specifications.frequency) {
+      specificationsList.push({ label: 'Frequency', value: product.specifications.frequency });
+    }
+    if (product.specifications.itemWeight) {
+      specificationsList.push({ label: 'Item Weight', value: product.specifications.itemWeight });
+    }
+    if (product.specifications.phase) {
+      specificationsList.push({ label: 'Phase', value: product.specifications.phase });
+    }
+    if (product.specifications.pcbAreaSize) {
+      specificationsList.push({ label: 'PCB Area Size', value: product.specifications.pcbAreaSize });
+    }
+    if (product.specifications.driverAreaSize) {
+      specificationsList.push({ label: 'Driver Area Size', value: product.specifications.driverAreaSize });
+    }
+  }
   
   return (
     <div className="container mx-auto px-4 py-8">

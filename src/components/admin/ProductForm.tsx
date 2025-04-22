@@ -27,6 +27,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       color: 'Silver',
       images: ['/placeholder.svg'],
       isActive: true,
+      specifications: {
+        minOrderQuantity: 50,
+        usageApplication: 'Indoor/Outdoor Lighting',
+        brand: 'Manisha Enterprises',
+        beamAngle: '120°',
+        ipRating: 'IP65',
+        lightingType: 'LED',
+        inputVoltage: '220-240V AC',
+        frequency: '50-60Hz',
+        itemWeight: '0.5kg',
+        phase: 'Single Phase',
+        pcbAreaSize: 'Standard',
+        driverAreaSize: 'Compact',
+      }
     }
   );
 
@@ -41,10 +55,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
     });
   };
 
+  const handleSpecChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setFormData({
+      ...formData,
+      specifications: {
+        ...formData.specifications,
+        [name]: type === 'number' ? parseInt(value) : value,
+      }
+    });
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData({
       ...formData,
       [name]: value,
+    });
+  };
+
+  const handleSpecSelectChange = (name: string, value: string) => {
+    setFormData({
+      ...formData,
+      specifications: {
+        ...formData.specifications,
+        [name]: value,
+      }
     });
   };
 
@@ -262,7 +297,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
             </div>
           </div>
 
-          {/* This would be expanded with all the specification fields in a real application */}
           <div className="pt-4 border-t">
             <h3 className="text-lg font-medium mb-4">Product Specifications</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -273,7 +307,42 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                   name="minOrderQuantity"
                   type="number"
                   min="1"
+                  value={formData.specifications?.minOrderQuantity}
+                  onChange={handleSpecChange}
                   placeholder="E.g., 50"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="usageApplication">Usage/Application</Label>
+                <Input
+                  id="usageApplication"
+                  name="usageApplication"
+                  value={formData.specifications?.usageApplication}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., Indoor/Outdoor Lighting"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brand">Brand</Label>
+                <Input
+                  id="brand"
+                  name="brand"
+                  value={formData.specifications?.brand}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., Manisha Enterprises"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="beamAngle">Beam Angle</Label>
+                <Input
+                  id="beamAngle"
+                  name="beamAngle"
+                  value={formData.specifications?.beamAngle}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., 120°"
                 />
               </div>
               
@@ -282,11 +351,88 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                 <Input
                   id="ipRating"
                   name="ipRating"
+                  value={formData.specifications?.ipRating}
+                  onChange={handleSpecChange}
                   placeholder="E.g., IP65"
                 />
               </div>
               
-              {/* More specification fields would be added here */}
+              <div className="space-y-2">
+                <Label htmlFor="lightingType">Lighting Type</Label>
+                <Input
+                  id="lightingType"
+                  name="lightingType"
+                  value={formData.specifications?.lightingType}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., LED"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="inputVoltage">Input Voltage</Label>
+                <Input
+                  id="inputVoltage"
+                  name="inputVoltage"
+                  value={formData.specifications?.inputVoltage}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., 220-240V AC"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="frequency">Frequency</Label>
+                <Input
+                  id="frequency"
+                  name="frequency"
+                  value={formData.specifications?.frequency}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., 50-60Hz"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="itemWeight">Item Weight</Label>
+                <Input
+                  id="itemWeight"
+                  name="itemWeight"
+                  value={formData.specifications?.itemWeight}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., 0.5kg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phase">Phase</Label>
+                <Input
+                  id="phase"
+                  name="phase"
+                  value={formData.specifications?.phase}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., Single Phase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pcbAreaSize">PCB Area Size</Label>
+                <Input
+                  id="pcbAreaSize"
+                  name="pcbAreaSize"
+                  value={formData.specifications?.pcbAreaSize}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., Standard"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="driverAreaSize">Driver Area Size</Label>
+                <Input
+                  id="driverAreaSize"
+                  name="driverAreaSize"
+                  value={formData.specifications?.driverAreaSize}
+                  onChange={handleSpecChange}
+                  placeholder="E.g., Compact"
+                />
+              </div>
             </div>
           </div>
         </CardContent>

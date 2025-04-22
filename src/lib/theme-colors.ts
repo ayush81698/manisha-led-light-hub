@@ -7,3 +7,10 @@ export const themeColors = {
   dark: '#0a1f31', // Darker blue for contrast
   light: '#fff9c4', // Light yellow for subtle highlights
 };
+
+// These colors will be used in both light and dark mode
+export const universalColors = {
+  yellow: 'hsl(45, 100%, 51%)', // #ffc107 in HSL format
+  yellow_hover: 'hsl(45, 100%, 45%)',
+  yellow_foreground: 'hsl(210, 80%, 15%)',
+};
