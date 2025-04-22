@@ -24,10 +24,22 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
     }
   }, []);
 
+  const getYoutubeId = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle various YouTube URL formats
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    return (match && match[2].length === 11)
+      ? match[2]
+      : url;
+  };
+
   const getBackgroundStyle = () => {
     switch (settings.backgroundType) {
       case 'color':
-        return { background: settings.backgroundValue };
+        return { background: settings.backgroundValue } as const;
       case 'image':
         return { 
           backgroundImage: `url(${settings.backgroundValue})`,
@@ -43,7 +55,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
           minHeight: '500px' as const
         };
       default:
-        return { background: '#f9fafb' };
+        return { background: '#f9fafb' } as const;
     }
   };
 
@@ -57,7 +69,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <iframe
             className="w-full h-full"
-            src={`https://www.youtube.com/embed/${settings.backgroundValue}?autoplay=1&mute=1&controls=0&loop=1&playlist=${settings.backgroundValue}`}
+            src={`https://www.youtube.com/embed/${getYoutubeId(settings.backgroundValue)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${getYoutubeId(settings.backgroundValue)}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             style={{ 

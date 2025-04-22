@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { X } from 'lucide-react';
 import { Product } from '@/data/products';
 
 interface ProductFormProps {
@@ -24,12 +25,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       shape: 'Round',
       material: 'Aluminum',
       color: 'Silver',
-      image: '/placeholder.svg',
+      images: ['/placeholder.svg'],
       isActive: true,
     }
   );
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrl, setImageUrl] = useState<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -48,14 +50,42 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+      const newFile = e.target.files[0];
+      setImageFiles([...imageFiles, newFile]);
+      
       // In a real app, you would upload the file to storage here
       // For now, we'll create a local URL for preview
-      const fileUrl = URL.createObjectURL(e.target.files[0]);
+      const fileUrl = URL.createObjectURL(newFile);
       setFormData({
         ...formData,
-        image: fileUrl,
+        images: [...(formData.images || []), fileUrl],
       });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = [...(formData.images || [])];
+    updatedImages.splice(index, 1);
+    setFormData({
+      ...formData,
+      images: updatedImages.length > 0 ? updatedImages : ['/placeholder.svg'],
+    });
+
+    // Also remove from imageFiles if present
+    if (index < imageFiles.length) {
+      const updatedFiles = [...imageFiles];
+      updatedFiles.splice(index, 1);
+      setImageFiles(updatedFiles);
+    }
+  };
+
+  const handleAddImageUrl = () => {
+    if (imageUrl && imageUrl.trim()) {
+      setFormData({
+        ...formData,
+        images: [...(formData.images || []), imageUrl.trim()],
+      });
+      setImageUrl('');
     }
   };
 
@@ -72,7 +102,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       return;
     }
     
-    // In a real app, you would upload the image file to storage here
+    // In a real app, you would upload the image files to storage here
     // and then save the product data to the database
     
     onSubmit(formData);
@@ -160,26 +190,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                 required
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="image">Product Image</Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              {formData.image && (
-                <div className="mt-2 h-20 w-20 border rounded overflow-hidden">
-                  <img
-                    src={formData.image}
-                    alt="Product preview"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-            </div>
           </div>
           
           <div className="space-y-2">
@@ -192,6 +202,64 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
               rows={4}
               required
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Product Images</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.images && formData.images.map((image, index) => (
+                <div key={index} className="relative group">
+                  <div className="h-20 w-20 border rounded overflow-hidden">
+                    <img
+                      src={image}
+                      alt={`Product image ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    size="icon" 
+                    className="h-5 w-5 absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleRemoveImage(index)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="image">Upload Image</Label>
+                <Input
+                  id="image"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="imageUrl"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleAddImageUrl}
+                    className="flex-shrink-0"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* This would be expanded with all the specification fields in a real application */}

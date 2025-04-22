@@ -27,10 +27,22 @@ const HeroSection = () => {
     navigate('/contact-options');
   };
 
+  const getYoutubeId = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle various YouTube URL formats
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    return (match && match[2].length === 11)
+      ? match[2]
+      : url;
+  };
+
   const getBackgroundStyle = () => {
     switch (settings.backgroundType) {
       case 'color':
-        return { background: settings.backgroundValue };
+        return { background: settings.backgroundValue } as const;
       case 'image':
         return { 
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${settings.backgroundValue})`,
@@ -44,7 +56,7 @@ const HeroSection = () => {
           backgroundColor: '#000'
         };
       default:
-        return {};
+        return {} as const;
     }
   };
 
@@ -54,7 +66,7 @@ const HeroSection = () => {
         <div className="absolute inset-0 pointer-events-none">
           <iframe
             className="w-full h-full"
-            src={`https://www.youtube.com/embed/${settings.backgroundValue}?autoplay=1&mute=1&controls=0&loop=1&playlist=${settings.backgroundValue}`}
+            src={`https://www.youtube.com/embed/${getYoutubeId(settings.backgroundValue)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${getYoutubeId(settings.backgroundValue)}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100vw', height: '100vh', pointerEvents: 'none' }}

@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Phone, Menu, X, Lightbulb } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -7,10 +8,10 @@ import { themeColors } from '@/lib/theme-colors';
 
 const Layout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const handleContactSales = () => {
-    const phoneNumber = '+919876543210';
-    window.location.href = `tel:${phoneNumber}`;
+    navigate('/contact-options');
   };
 
   return (
@@ -120,8 +121,12 @@ const Layout = () => {
                 <address className="text-gray-300 not-italic">
                   123 Industrial Area, <br />
                   Mumbai, India <br />
-                  <a href="tel:+919876543210" className="hover:text-white">+91 9876543210</a> <br />
-                  <a href="mailto:info@manishaenterprises.com" className="hover:text-white">info@manishaenterprises.com</a>
+                  <Button variant="link" className="p-0 h-auto text-gray-300 hover:text-white" onClick={handleContactSales}>
+                    +91 9876543210
+                  </Button> <br />
+                  <Button variant="link" className="p-0 h-auto text-gray-300 hover:text-white" onClick={handleContactSales}>
+                    info@manishaenterprises.com
+                  </Button>
                 </address>
               </div>
             </div>

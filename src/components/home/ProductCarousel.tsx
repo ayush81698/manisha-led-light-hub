@@ -3,11 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Product {
   id: string;
   name: string;
-  image: string;
+  images: string[];
 }
 
 interface ProductCarouselProps {
@@ -26,7 +27,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ products }) => {
         >
           <div className="h-48 bg-gray-100 flex items-center justify-center">
             <img
-              src={product.image}
+              src={product.images[0]}
               alt={product.name}
               className="h-40 w-auto object-contain"
             />

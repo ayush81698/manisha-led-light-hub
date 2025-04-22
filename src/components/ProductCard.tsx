@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Product } from "@/data/products";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +15,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [quantity, setQuantity] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,15 +43,57 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setIsSubmitting(false);
     }, 1000);
   };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+    );
+  };
   
   return (
     <Card className="w-full h-full product-card-shadow rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-      <div className="h-48 bg-gray-100 flex items-center justify-center p-4">
+      <div className="h-48 bg-gray-100 flex items-center justify-center p-4 relative">
         <img
-          src={product.image}
+          src={product.images[currentImageIndex]}
           alt={product.name}
           className="max-h-full max-w-full object-contain"
         />
+        
+        {product.images.length > 1 && (
+          <>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute left-1 bg-white bg-opacity-50 hover:bg-opacity-70"
+              onClick={prevImage}
+            >
+              <ChevronLeft size={16} />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-1 bg-white bg-opacity-50 hover:bg-opacity-70"
+              onClick={nextImage}
+            >
+              <ChevronRight size={16} />
+            </Button>
+            <div className="absolute bottom-1 inset-x-0 flex justify-center gap-1">
+              {product.images.map((_, index) => (
+                <div 
+                  key={index} 
+                  className={`w-2 h-2 rounded-full ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300'}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                ></div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <CardContent className="p-5">
         <div className="mb-4">

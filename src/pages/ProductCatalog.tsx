@@ -65,6 +65,9 @@ const ProductCatalog = () => {
       result = result.filter(p => filters.materials.includes(p.material));
     }
     
+    // Only show active products
+    result = result.filter(p => p.isActive);
+    
     setFilteredProducts(result);
   };
   
@@ -74,12 +77,17 @@ const ProductCatalog = () => {
       shapes: [],
       materials: []
     });
-    setFilteredProducts(products);
+    setFilteredProducts(products.filter(p => p.isActive));
   };
 
   const handleProductClick = (productId: string) => {
     navigate(`/products/${productId}`);
   };
+  
+  // Apply filters on initial load - only showing active products
+  React.useEffect(() => {
+    setFilteredProducts(products.filter(p => p.isActive));
+  }, []);
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -179,12 +187,22 @@ const ProductCatalog = () => {
                   className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
                   onClick={() => handleProductClick(product.id)}
                 >
-                  <div className="h-48 bg-gray-100 flex items-center justify-center">
+                  <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                     <img
-                      src={product.image}
+                      src={product.images[0]}
                       alt={product.name}
                       className="h-40 w-auto object-contain"
                     />
+                    {product.images.length > 1 && (
+                      <div className="absolute bottom-1 inset-x-0 flex justify-center gap-1">
+                        {product.images.map((_, index) => (
+                          <div 
+                            key={index} 
+                            className={`w-2 h-2 rounded-full bg-gray-300`}
+                          ></div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <CardContent className="p-4">
                     <h3 className="text-lg font-semibold mb-2">{product.name}</h3>

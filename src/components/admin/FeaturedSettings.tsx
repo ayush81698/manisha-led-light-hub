@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,18 @@ const FeaturedSettings = () => {
     });
   };
 
+  const getYoutubeId = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle various YouTube URL formats
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    return (match && match[2].length === 11)
+      ? match[2]
+      : url; // Return the original string if it doesn't match
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -55,7 +68,7 @@ const FeaturedSettings = () => {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="video" id="featured-video" />
-              <Label htmlFor="featured-video">YouTube Video ID</Label>
+              <Label htmlFor="featured-video">YouTube Video URL</Label>
             </div>
           </RadioGroup>
         </div>
@@ -64,7 +77,7 @@ const FeaturedSettings = () => {
           <Label>
             {settings.backgroundType === 'color' ? 'Color Value' :
              settings.backgroundType === 'image' ? 'Image URL' :
-             'YouTube Video ID'}
+             'YouTube Video URL'}
           </Label>
           {settings.backgroundType === 'color' ? (
             <div className="flex items-center gap-2">
@@ -86,9 +99,16 @@ const FeaturedSettings = () => {
               onChange={(e) => setSettings({ ...settings, backgroundValue: e.target.value })}
               placeholder={
                 settings.backgroundType === 'image' ? 'https://example.com/image.jpg' :
-                'dQw4w9WgXcQ'
+                'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
               }
             />
+          )}
+          
+          {settings.backgroundType === 'video' && settings.backgroundValue && (
+            <div className="mt-4 p-2 bg-gray-50 rounded-md">
+              <p className="text-sm text-gray-500 mb-2">Preview YouTube Video ID:</p>
+              <code className="text-xs bg-gray-100 p-1 rounded">{getYoutubeId(settings.backgroundValue)}</code>
+            </div>
           )}
         </div>
 

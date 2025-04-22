@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { products, Product, inquiries } from '@/data/products';
+import { products, Product, inquiries, updateProduct, addProduct, toggleProductStatus } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
 import ProductForm from '@/components/admin/ProductForm';
 import HeroSettings from '@/components/admin/HeroSettings';
@@ -32,11 +32,8 @@ const AdminDashboard = () => {
   };
   
   const handleToggleProductStatus = (productId: string) => {
-    setProductsList(prev => 
-      prev.map(product => 
-        product.id === productId ? {...product, isActive: !product.isActive} : product
-      )
-    );
+    toggleProductStatus(productId);
+    setProductsList([...products]); // Update local state with updated products
     
     const product = productsList.find(p => p.id === productId);
     const newStatus = product?.isActive ? 'inactive' : 'active';
@@ -49,11 +46,9 @@ const AdminDashboard = () => {
   
   const handleProductSubmit = (productData: Partial<Product>) => {
     if (currentProduct) {
-      setProductsList(prev => 
-        prev.map(product => 
-          product.id === currentProduct.id ? { ...product, ...productData } : product
-        )
-      );
+      const updatedProduct = { ...currentProduct, ...productData } as Product;
+      updateProduct(updatedProduct);
+      setProductsList([...products]); // Update local state
       
       setIsEditProductOpen(false);
       setCurrentProduct(null);
@@ -71,11 +66,12 @@ const AdminDashboard = () => {
         shape: productData.shape || 'Round',
         material: productData.material || 'Aluminum',
         color: productData.color || 'Silver',
-        image: productData.image || '/placeholder.svg',
+        images: productData.images || ['/placeholder.svg'],
         isActive: true,
       };
       
-      setProductsList(prev => [...prev, newProduct]);
+      addProduct(newProduct);
+      setProductsList([...products]); // Update local state
       setIsNewProductOpen(false);
       
       toast({
@@ -270,7 +266,7 @@ const AdminDashboard = () => {
                               <div className="h-10 w-10 flex-shrink-0 mr-3">
                                 <img
                                   className="h-10 w-10 rounded-md object-cover"
-                                  src={product.image}
+                                  src={product.images[0]}
                                   alt={product.name}
                                 />
                               </div>
