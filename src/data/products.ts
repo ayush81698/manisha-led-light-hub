@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProductSpecifications {
@@ -33,6 +32,7 @@ export interface Product {
   images?: string[];
   price?: string;
   image_url?: string;
+  model_url?: string;
 }
 
 // Mock data for initial loading - will be replaced with DB data
@@ -163,7 +163,8 @@ export async function addProduct(product: Product): Promise<Product | null> {
         is_active: product.is_active,
         specifications_id: specData.id,
         image_url: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
-        price: product.price || ''
+        price: product.price || '',
+        model_url: product.model_url || null
       })
       .select()
       .single();
@@ -215,7 +216,8 @@ export async function updateProduct(product: Product): Promise<Product | null> {
         color: product.color,
         is_active: product.is_active,
         image_url: product.images && product.images.length > 0 ? product.images[0] : product.image_url || '/placeholder.svg',
-        price: product.price || ''
+        price: product.price || '',
+        model_url: product.model_url || null
       })
       .eq('id', product.id)
       .select()
