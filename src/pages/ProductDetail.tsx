@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchProducts, saveInquiry, Product, ProductSpecifications } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductModelViewer } from '@/components/ProductModelViewer';
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -19,6 +20,7 @@ const ProductDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'image' | '3d'>('image');
   
   useEffect(() => {
     const loadProduct = async () => {
@@ -51,7 +53,8 @@ const ProductDetail = () => {
             specifications: data.product_specifications as ProductSpecifications,
             images: data.product_images?.map((img: any) => img.image_url) || [],
             image_url: data.image_url,
-            price: data.price
+            price: data.price,
+            model_url: data.model_url
           };
           
           setProduct(formattedProduct);
@@ -213,42 +216,73 @@ const ProductDetail = () => {
       </Button>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Product Image */}
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md flex items-center justify-center relative">
-          <img 
-            src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : product.image_url || '/placeholder.svg'} 
-            alt={product.name} 
-            className="max-h-96 object-contain"
-          />
-
-          {product.images && product.images.length > 1 && (
+        {/* Product Image/3D Model Viewer */}
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md flex flex-col items-center justify-center relative">
+          {product.model_url && (
+            <div className="flex justify-center gap-2 mb-4">
+              <Button 
+                variant={viewMode === 'image' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setViewMode('image')}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                View Images
+              </Button>
+              <Button 
+                variant={viewMode === '3d' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setViewMode('3d')}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                View 3D Model
+              </Button>
+            </div>
+          )}
+          
+          {viewMode === 'image' ? (
             <>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute left-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
-                onClick={prevImage}
-              >
-                <ChevronLeft size={16} />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
-                onClick={nextImage}
-              >
-                <ChevronRight size={16} />
-              </Button>
-              <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1">
-                {product.images.map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`w-2 h-2 rounded-full cursor-pointer ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
-                    onClick={() => setCurrentImageIndex(index)}
-                  ></div>
-                ))}
-              </div>
+              <img 
+                src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : product.image_url || '/placeholder.svg'} 
+                alt={product.name} 
+                className="max-h-96 object-contain"
+              />
+
+              {product.images && product.images.length > 1 && (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute left-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
+                    onClick={prevImage}
+                  >
+                    <ChevronLeft size={16} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
+                    onClick={nextImage}
+                  >
+                    <ChevronRight size={16} />
+                  </Button>
+                  <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1">
+                    {product.images.map((_, index) => (
+                      <div 
+                        key={index} 
+                        className={`w-2 h-2 rounded-full cursor-pointer ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
+                        onClick={() => setCurrentImageIndex(index)}
+                      ></div>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
+          ) : (
+            <div className="h-96 w-full">
+              <Suspense fallback={<div className="flex justify-center items-center h-full"><Loader className="animate-spin" /></div>}>
+                {product.model_url && <ProductModelViewer modelUrl={product.model_url} />}
+              </Suspense>
+            </div>
           )}
         </div>
         

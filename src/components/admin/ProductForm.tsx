@@ -46,6 +46,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [modelFile, setModelFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -94,6 +95,21 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       setFormData({
         ...formData,
         images: [...(formData.images || []), fileUrl],
+      });
+    }
+  };
+
+  const handleModelFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setModelFile(file);
+      
+      // In a real app, you would upload the model file to storage here
+      // For now, we'll create a local URL
+      const fileUrl = URL.createObjectURL(file);
+      setFormData({
+        ...formData,
+        model_url: fileUrl,
       });
     }
   };
@@ -307,6 +323,40 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                 </div>
               </div>
             </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="dark:text-white">3D Model (optional)</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="modelFile" className="dark:text-white">Upload 3D Model (.glb)</Label>
+                <Input
+                  id="modelFile"
+                  name="modelFile"
+                  type="file"
+                  accept=".glb"
+                  onChange={handleModelFileChange}
+                  className="dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="model_url" className="dark:text-white">3D Model URL (.glb)</Label>
+                <Input
+                  id="model_url"
+                  name="model_url"
+                  value={formData.model_url || ''}
+                  onChange={handleChange}
+                  placeholder="https://example.com/model.glb"
+                  className="dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            </div>
+            {formData.model_url && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                3D model set: {formData.model_url}
+              </p>
+            )}
           </div>
 
           <div className="pt-4 border-t dark:border-gray-700">
