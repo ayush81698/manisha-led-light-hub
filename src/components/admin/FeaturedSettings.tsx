@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ColorPicker } from 'lucide-react';
 import type { SectionSettings } from '@/lib/types';
 
 const FeaturedSettings = () => {
@@ -27,7 +25,6 @@ const FeaturedSettings = () => {
   }, []);
 
   const handleSave = () => {
-    // In a real app, this would save to a database
     localStorage.setItem('featuredSettings', JSON.stringify(settings));
     toast({
       title: "Settings saved",
