@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ModelProps {
   modelUrl: string;
@@ -12,19 +13,23 @@ function Model({ modelUrl }: ModelProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Add error handling for the model loading
-    const handleError = () => {
-      setError("Failed to load 3D model");
-      console.error(`Failed to load model from URL: ${modelUrl}`);
+    const checkModelUrl = async () => {
+      try {
+        if (!modelUrl.startsWith('http')) {
+          setError("Invalid model URL format");
+          return;
+        }
+
+        const response = await fetch(modelUrl);
+        if (!response.ok) {
+          setError("Failed to load 3D model");
+        }
+      } catch {
+        setError("Failed to load 3D model");
+      }
     };
 
-    // Attempt to check if the URL is accessible
-    if (modelUrl.startsWith('blob:')) {
-      fetch(modelUrl)
-        .catch(() => {
-          setError("This 3D model is no longer available (blob URL expired)");
-        });
-    }
+    checkModelUrl();
   }, [modelUrl]);
 
   if (error) {
@@ -33,7 +38,7 @@ function Model({ modelUrl }: ModelProps) {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
           <p className="text-red-500 mb-2">{error}</p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Please try uploading the model again.
+            Please ensure the model is properly uploaded to storage.
           </p>
         </div>
       </Html>

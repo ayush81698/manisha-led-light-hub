@@ -141,6 +141,29 @@ function mapShapeValue(shape: string): 'Round' | 'Square' | 'Rectangular' | 'Cus
 
 export async function addProduct(product: Product): Promise<Product | null> {
   try {
+    // Handle 3D model file if present
+    let modelUrl = product.model_url;
+    if (modelUrl && modelUrl.startsWith('blob:')) {
+      const modelResponse = await fetch(modelUrl);
+      const modelBlob = await modelResponse.blob();
+      const modelFileName = `models/${Date.now()}.glb`;
+      
+      const { data: modelData, error: modelError } = await supabase.storage
+        .from('product-models')
+        .upload(modelFileName, modelBlob, {
+          contentType: 'model/gltf-binary'
+        });
+
+      if (modelError) throw modelError;
+
+      // Get the public URL for the uploaded model
+      const { data: publicUrlData } = supabase.storage
+        .from('product-models')
+        .getPublicUrl(modelFileName);
+
+      modelUrl = publicUrlData.publicUrl;
+    }
+
     // First, insert specifications
     const { data: specData, error: specError } = await supabase
       .from('product_specifications')
@@ -150,7 +173,7 @@ export async function addProduct(product: Product): Promise<Product | null> {
 
     if (specError) throw specError;
 
-    // Then, insert product with specifications ID
+    // Then, insert product with specifications ID and permanent model URL
     const { data: productData, error: productError } = await supabase
       .from('products')
       .insert({
@@ -164,14 +187,14 @@ export async function addProduct(product: Product): Promise<Product | null> {
         specifications_id: specData.id,
         image_url: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
         price: product.price || '',
-        model_url: product.model_url || null
+        model_url: modelUrl
       })
       .select()
       .single();
 
     if (productError) throw productError;
 
-    // Insert images if any
+    // Handle product images
     if (product.images && product.images.length > 0) {
       const imageInserts = product.images.map((imageUrl, index) => ({
         product_id: productData.id,
