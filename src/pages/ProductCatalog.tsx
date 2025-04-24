@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchProducts, Product } from '@/data/products';
@@ -6,13 +5,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import FlipProductCard from '@/components/products/FlipProductCard';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { HamsterLoader } from '@/components/ui/hamster-loader';
 
 const ProductCatalog = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     wattageRange: [0, 50],
     shapes: [] as string[],
@@ -21,18 +22,21 @@ const ProductCatalog = () => {
   
   useEffect(() => {
     const loadProducts = async () => {
-      const data = await fetchProducts();
-      setProducts(data);
-      setFilteredProducts(data.filter(p => p.is_active));
+      setLoading(true);
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+        setFilteredProducts(data.filter(p => p.is_active));
+      } catch (error) {
+        console.error('Failed to load products:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     
     loadProducts();
   }, []);
-  
-  // Extract unique shape and material values
-  const uniqueShapes = Array.from(new Set(products.map(p => p.shape)));
-  const uniqueMaterials = Array.from(new Set(products.map(p => p.material)));
-  
+
   const handleWattageChange = (value: number[]) => {
     setFilters({ ...filters, wattageRange: value });
   };
@@ -60,23 +64,19 @@ const ProductCatalog = () => {
   const applyFilters = () => {
     let result = products;
     
-    // Filter by wattage range
     result = result.filter(p => 
       p.wattage >= filters.wattageRange[0] && 
       p.wattage <= filters.wattageRange[1]
     );
     
-    // Filter by shapes
     if (filters.shapes.length > 0) {
       result = result.filter(p => filters.shapes.includes(p.shape));
     }
     
-    // Filter by materials
     if (filters.materials.length > 0) {
       result = result.filter(p => filters.materials.includes(p.material));
     }
     
-    // Only show active products
     result = result.filter(p => p.is_active);
     
     setFilteredProducts(result);
@@ -95,6 +95,10 @@ const ProductCatalog = () => {
     navigate(`/products/${productId}`);
   };
   
+  if (loading) {
+    return <HamsterLoader fullScreen />;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 text-center">
@@ -103,7 +107,6 @@ const ProductCatalog = () => {
       </div>
       
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Filters sidebar */}
         <div className="lg:w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 dark:text-white">Filters</h3>
@@ -175,7 +178,6 @@ const ProductCatalog = () => {
           </div>
         </div>
         
-        {/* Products grid */}
         <div className="lg:w-3/4">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-12">
@@ -188,46 +190,7 @@ const ProductCatalog = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map(product => (
-                <Card 
-                  key={product.id} 
-                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer dark:bg-gray-700"
-                  onClick={() => handleProductClick(product.id || '')}
-                >
-                  <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative">
-                    <img
-                      src={(product.images && product.images.length > 0) ? product.images[0] : (product.image_url || '/placeholder.svg')}
-                      alt={product.name}
-                      className="h-40 w-auto object-contain"
-                    />
-                    {product.images && product.images.length > 1 && (
-                      <div className="absolute bottom-1 inset-x-0 flex justify-center gap-1">
-                        {product.images.map((_, index) => (
-                          <div 
-                            key={index} 
-                            className={`w-2 h-2 rounded-full bg-gray-300`}
-                          ></div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 dark:text-white">{product.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{product.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-primary dark:text-yellow-500 font-medium">{product.wattage}W</span>
-                      <Button 
-                        size="sm" 
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductClick(product.id || '');
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <FlipProductCard key={product.id} product={product} />
               ))}
             </div>
           )}

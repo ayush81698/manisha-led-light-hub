@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductModelViewer } from '@/components/ProductModelViewer';
+import { HamsterLoader } from '@/components/HamsterLoader';
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -40,7 +40,6 @@ const ProductDetail = () => {
         if (error) throw error;
         
         if (data) {
-          // Transform data to match our Product interface
           const formattedProduct: Product = {
             id: data.id,
             name: data.name,
@@ -54,7 +53,7 @@ const ProductDetail = () => {
             images: data.product_images?.map((img: any) => img.image_url) || [],
             image_url: data.image_url,
             price: data.price,
-            model_url: data.model_url ?? undefined, // Ensure property is always defined
+            model_url: data.model_url ?? undefined,
           };
           
           setProduct(formattedProduct);
@@ -103,7 +102,6 @@ const ProductDetail = () => {
     }
     
     try {
-      // Save inquiry to database
       const { data, error } = await supabase
         .from('inquiries')
         .insert({
@@ -122,7 +120,6 @@ const ProductDetail = () => {
         description: "We'll contact you shortly regarding your inquiry.",
       });
       
-      // Reset form
       setQuantity('1');
       setPhone('');
       setNotes('');
@@ -154,7 +151,6 @@ const ProductDetail = () => {
     );
   }
   
-  // Build specification list from product data
   const specificationsList = [
     { label: 'Wattage', value: `${product.wattage}W` },
     { label: 'Shape', value: product.shape },
@@ -162,7 +158,6 @@ const ProductDetail = () => {
     { label: 'Color', value: product.color },
   ];
   
-  // Add specifications from the product specifications object if it exists
   if (product.specifications) {
     if (product.specifications.min_order_quantity) {
       specificationsList.push({ label: 'Minimum Order Quantity', value: `${product.specifications.min_order_quantity} units` });
@@ -216,7 +211,6 @@ const ProductDetail = () => {
       </Button>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Product Image/3D Model Viewer */}
         <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md flex flex-col items-center justify-center relative">
           {product.model_url && (
             <div className="flex justify-center gap-2 mb-4">
@@ -279,14 +273,13 @@ const ProductDetail = () => {
             </>
           ) : (
             <div className="h-96 w-full">
-              <Suspense fallback={<div className="flex justify-center items-center h-full"><Loader className="animate-spin" /></div>}>
+              <Suspense fallback={<HamsterLoader />}>
                 {product.model_url && <ProductModelViewer modelUrl={product.model_url} />}
               </Suspense>
             </div>
           )}
         </div>
         
-        {/* Product Info */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
           <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">{product.description}</p>
@@ -361,5 +354,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-
-// ... end of file
