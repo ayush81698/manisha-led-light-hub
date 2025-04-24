@@ -1,12 +1,7 @@
 
 import React from 'react';
 import FlipProductCard from '@/components/products/FlipProductCard';
-
-interface Product {
-  id: string;
-  name: string;
-  images: string[];
-}
+import { Product } from '@/data/products';
 
 interface ProductCarouselProps {
   products: Product[];

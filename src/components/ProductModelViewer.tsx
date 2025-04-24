@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
@@ -11,25 +11,54 @@ interface ModelProps {
 
 function Model({ modelUrl }: ModelProps) {
   const [error, setError] = useState<string | null>(null);
+  const [validatedModelUrl, setValidatedModelUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkModelUrl = async () => {
+    const validateModelUrl = async () => {
       try {
-        if (!modelUrl.startsWith('http')) {
-          setError("Invalid model URL format");
-          return;
-        }
+        // If it's a blob URL, we need to upload it to Supabase storage
+        if (modelUrl.startsWith('blob:')) {
+          const blobResponse = await fetch(modelUrl);
+          const blobFile = await blobResponse.blob();
+          
+          // Generate a unique filename
+          const fileName = `model_${Date.now()}.glb`;
+          
+          // Upload to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('product-models')
+            .upload(fileName, blobFile, {
+              contentType: 'model/gltf-binary'
+            });
 
-        const response = await fetch(modelUrl);
-        if (!response.ok) {
-          setError("Failed to load 3D model");
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            setError('Failed to upload 3D model');
+            return;
+          }
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('product-models')
+            .getPublicUrl(fileName);
+
+          setValidatedModelUrl(urlData.publicUrl);
+        } else {
+          // Validate existing URL
+          const response = await fetch(modelUrl, { method: 'HEAD' });
+          if (!response.ok) {
+            setError('Invalid model URL');
+            return;
+          }
+          setValidatedModelUrl(modelUrl);
         }
-      } catch {
-        setError("Failed to load 3D model");
+      } catch (err) {
+        console.error('Model validation error:', err);
+        setError('Failed to validate 3D model');
       }
     };
 
-    checkModelUrl();
+    validateModelUrl();
   }, [modelUrl]);
 
   if (error) {
@@ -38,15 +67,19 @@ function Model({ modelUrl }: ModelProps) {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
           <p className="text-red-500 mb-2">{error}</p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Please ensure the model is properly uploaded to storage.
+            Please upload a valid 3D model.
           </p>
         </div>
       </Html>
     );
   }
 
+  if (!validatedModelUrl) {
+    return <Html center><HamsterLoader /></Html>;
+  }
+
   try {
-    const gltf = useGLTF(modelUrl);
+    const gltf = useGLTF(validatedModelUrl);
     return <primitive object={gltf.scene} scale={1.5} position={[0, 0, 0]} />;
   } catch (err) {
     return (

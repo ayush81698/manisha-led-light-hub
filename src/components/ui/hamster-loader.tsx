@@ -7,7 +7,7 @@ interface LoaderProps {
 export const HamsterLoader: React.FC<LoaderProps> = ({ fullScreen = false }) => {
   return (
     <div className={`loader-wrapper ${fullScreen ? 'fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center' : ''}`}>
-      <div className="wheel-and-hamster scale-50" role="img" aria-label="Hamster in wheel">
+      <div className="wheel-and-hamster scale-[0.25]" role="img" aria-label="Hamster in wheel">
         <div className="wheel"></div>
         <div className="hamster">
           <div className="hamster__body">
