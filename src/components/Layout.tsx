@@ -12,7 +12,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <header className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm">
         <div className="container mx-auto px-4 flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-yellow-500">ManishaEnterprises</span>
+            <img 
+              src="/lovable-uploads/d594515a-74c6-44af-923c-a56371ce48f8.png" 
+              alt="Manisha Enterprises Logo" 
+              className="h-10 w-auto"
+            />
           </Link>
           
           {/* Desktop Navigation */}
@@ -38,18 +42,24 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Contact Sales
               </Link>
             </Button>
+
+            <Button asChild variant="outline" className="hidden md:flex">
+              <Link to="/admin">
+                Admin
+              </Link>
+            </Button>
             
             <ThemeToggle />
             
-            {/* Mobile Menu */}
+            {/* Mobile Menu with Sliding Animation */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
                   <Menu />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
-                <nav className="flex flex-col gap-4 mt-8">
+              <SheetContent side="right" className="w-[80%] p-0">
+                <nav className="flex flex-col gap-4 mt-8 p-6 animate-slide-in-right">
                   <Link to="/" className="text-lg font-medium hover:text-yellow-500 dark:hover:text-yellow-400">
                     Home
                   </Link>
@@ -64,6 +74,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </Link>
                   <Link to="/contact-options" className="text-lg font-medium hover:text-yellow-500 dark:hover:text-yellow-400">
                     Contact Sales
+                  </Link>
+                  <Link to="/admin" className="text-lg font-medium hover:text-yellow-500 dark:hover:text-yellow-400">
+                    Admin
                   </Link>
                 </nav>
               </SheetContent>
