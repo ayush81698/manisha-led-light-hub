@@ -20,6 +20,9 @@ const ProductCatalog = () => {
     materials: [] as string[]
   });
   
+  const [uniqueShapes, setUniqueShapes] = useState<string[]>([]);
+  const [uniqueMaterials, setUniqueMatrials] = useState<string[]>([]);
+  
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
@@ -27,6 +30,11 @@ const ProductCatalog = () => {
         const data = await fetchProducts();
         setProducts(data);
         setFilteredProducts(data.filter(p => p.is_active));
+        
+        const shapes = Array.from(new Set(data.map(p => p.shape)));
+        const materials = Array.from(new Set(data.map(p => p.material)));
+        setUniqueShapes(shapes);
+        setUniqueMatrials(materials);
       } catch (error) {
         console.error('Failed to load products:', error);
       } finally {

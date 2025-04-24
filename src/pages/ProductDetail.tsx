@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductModelViewer } from '@/components/ProductModelViewer';
-import { HamsterLoader } from '@/components/HamsterLoader';
+import { HamsterLoader } from '@/components/ui/hamster-loader';
 
 const ProductDetail = () => {
   const { productId } = useParams();
