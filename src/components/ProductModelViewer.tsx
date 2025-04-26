@@ -32,6 +32,19 @@ function Model({ modelUrl }: ModelProps) {
       
       console.log("Processing model URL:", modelUrl);
       
+      // Try a HEAD request to check if URL is directly accessible
+      try {
+        const response = await fetch(modelUrl, { method: 'HEAD' });
+        if (response.ok) {
+          console.log("URL is directly accessible:", modelUrl);
+          setValidatedModelUrl(modelUrl);
+          validatedModelsCache.set(modelUrl, modelUrl);
+          return;
+        }
+      } catch (headErr) {
+        console.log("HEAD request failed, continuing with other checks:", headErr);
+      }
+      
       // If it's already a Supabase URL, use it directly
       if (modelUrl.includes('supabase') && modelUrl.includes('product-models')) {
         console.log("Already a Supabase URL, using directly");
@@ -69,6 +82,16 @@ function Model({ modelUrl }: ModelProps) {
           
           console.log("Blob file size:", blobFile.size, "bytes");
           
+          // Check if file is too large (> 50MB)
+          const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+          if (blobFile.size > MAX_FILE_SIZE) {
+            console.error("File size exceeds 50MB limit:", blobFile.size);
+            setError(`File size (${(blobFile.size / (1024 * 1024)).toFixed(2)}MB) exceeds the 50MB limit`);
+            setUploadProgress(null);
+            setIsUploading(false);
+            return;
+          }
+          
           // Generate a unique filename
           const fileName = `model_${Date.now()}.glb`;
           console.log("Generated filename:", fileName);
@@ -95,11 +118,11 @@ function Model({ modelUrl }: ModelProps) {
             console.log("Bucket 'product-models' doesn't exist, creating it");
             
             try {
-              // Get authentication token - using getSession() instead of directly accessing session
+              // Get authentication session data
               const { data: sessionData } = await supabase.auth.getSession();
               const token = sessionData?.session?.access_token || '';
               
-              // First try creating bucket with REST API
+              // Create bucket with REST API
               const createBucketResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
                 method: 'POST',
                 headers: {
@@ -111,19 +134,22 @@ function Model({ modelUrl }: ModelProps) {
                   id: 'product-models',
                   name: 'product-models',
                   public: true,
-                  file_size_limit: 100000000 // 100MB
+                  file_size_limit: 52428800 // 50MB in bytes
                 })
               });
               
               if (!createBucketResponse.ok) {
-                console.log('Direct REST API bucket creation failed, trying supabase client');
+                const errorData = await createBucketResponse.json();
+                console.error('REST API bucket creation failed:', errorData);
+                
+                // Try with supabase client as fallback
                 const { error: bucketError } = await supabase.storage.createBucket('product-models', {
                   public: true,
-                  fileSizeLimit: 100000000 // 100MB
+                  fileSizeLimit: 52428800 // 50MB
                 });
                 
                 if (bucketError) {
-                  console.error('Error creating bucket:', bucketError);
+                  console.error('Client bucket creation error:', bucketError);
                   throw new Error(`Failed to create storage bucket: ${bucketError.message}`);
                 }
               }
@@ -256,7 +282,23 @@ function Model({ modelUrl }: ModelProps) {
   const ModelContent = () => {
     try {
       console.log("Loading 3D model from URL:", validatedModelUrl);
-      const { scene } = useGLTF(validatedModelUrl);
+      // Add error boundaries and additional logging
+      const { scene, errors } = useGLTF(validatedModelUrl, true);
+      
+      if (errors && Object.keys(errors).length > 0) {
+        console.error("GLTF loading errors:", errors);
+        return (
+          <Html center>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
+              <p className="text-red-500 mb-2">Error loading 3D model</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                The model may be corrupted or in an unsupported format.
+              </p>
+            </div>
+          </Html>
+        );
+      }
+      
       return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
     } catch (err) {
       console.error("Error loading 3D model:", err);
@@ -265,7 +307,7 @@ function Model({ modelUrl }: ModelProps) {
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
             <p className="text-red-500 mb-2">Failed to load 3D model</p>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              The model may be corrupted or in an unsupported format.
+              Error details: {err instanceof Error ? err.message : 'Unknown error'}
             </p>
           </div>
         </Html>
