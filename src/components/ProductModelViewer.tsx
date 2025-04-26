@@ -282,11 +282,12 @@ function Model({ modelUrl }: ModelProps) {
   const ModelContent = () => {
     try {
       console.log("Loading 3D model from URL:", validatedModelUrl);
-      // Add error boundaries and additional logging
-      const { scene, errors } = useGLTF(validatedModelUrl, true);
+      // Fix the error by not trying to access the errors property
+      const gltf = useGLTF(validatedModelUrl, true);
       
-      if (errors && Object.keys(errors).length > 0) {
-        console.error("GLTF loading errors:", errors);
+      // Check if the scene is available
+      if (!gltf || !gltf.scene) {
+        console.error("GLTF loading issue - scene not available");
         return (
           <Html center>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
@@ -299,7 +300,7 @@ function Model({ modelUrl }: ModelProps) {
         );
       }
       
-      return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
+      return <primitive object={gltf.scene} scale={1.5} position={[0, 0, 0]} />;
     } catch (err) {
       console.error("Error loading 3D model:", err);
       return (
