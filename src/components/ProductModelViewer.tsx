@@ -13,6 +13,7 @@ function Model({ modelUrl }: ModelProps) {
   const [error, setError] = useState<string | null>(null);
   const [validatedModelUrl, setValidatedModelUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
     const validateModelUrl = async () => {
@@ -21,6 +22,7 @@ function Model({ modelUrl }: ModelProps) {
         
         // If it's a blob URL, we need to upload it to Supabase storage
         if (modelUrl.startsWith('blob:')) {
+          setIsUploading(true);
           setUploadProgress(0);
           console.log("Detected blob URL, preparing to upload to Supabase");
           
@@ -32,6 +34,7 @@ function Model({ modelUrl }: ModelProps) {
             console.error("Failed to fetch blob or blob is empty");
             setError('Invalid model file');
             setUploadProgress(null);
+            setIsUploading(false);
             return;
           }
           
@@ -41,9 +44,28 @@ function Model({ modelUrl }: ModelProps) {
           const fileName = `model_${Date.now()}.glb`;
           console.log("Generated filename:", fileName);
           
-          // Upload to Supabase storage with progress tracking
           try {
             setUploadProgress(10);
+            
+            // Check if the storage bucket exists, if not create it
+            const { data: buckets } = await supabase.storage.listBuckets();
+            const bucketExists = buckets?.some(bucket => bucket.name === 'product-models');
+            
+            if (!bucketExists) {
+              console.log("Bucket 'product-models' doesn't exist, creating it");
+              const { error: bucketError } = await supabase.storage.createBucket('product-models', {
+                public: true,
+                fileSizeLimit: 100000000 // 100MB limit
+              });
+              
+              if (bucketError) {
+                console.error('Error creating bucket:', bucketError);
+                setError('Failed to create storage bucket');
+                setUploadProgress(null);
+                setIsUploading(false);
+                return;
+              }
+            }
             
             // Upload to Supabase storage
             const { data: uploadData, error: uploadError } = await supabase.storage
@@ -57,6 +79,7 @@ function Model({ modelUrl }: ModelProps) {
               console.error('Upload error:', uploadError);
               setError('Failed to upload 3D model: ' + uploadError.message);
               setUploadProgress(null);
+              setIsUploading(false);
               return;
             }
             
@@ -72,6 +95,7 @@ function Model({ modelUrl }: ModelProps) {
               console.error("Failed to get public URL");
               setError('Failed to get public URL for the uploaded model');
               setUploadProgress(null);
+              setIsUploading(false);
               return;
             }
             
@@ -82,11 +106,13 @@ function Model({ modelUrl }: ModelProps) {
             // Add a short delay to ensure the URL is accessible
             setTimeout(() => {
               setUploadProgress(null);
-            }, 1000);
+              setIsUploading(false);
+            }, 1500);
           } catch (uploadErr) {
             console.error("Upload exception:", uploadErr);
             setError('Exception during upload: ' + (uploadErr instanceof Error ? uploadErr.message : String(uploadErr)));
             setUploadProgress(null);
+            setIsUploading(false);
           }
         } else {
           console.log("Not a blob URL, validating normal URL");
@@ -126,7 +152,7 @@ function Model({ modelUrl }: ModelProps) {
     }
   }, [modelUrl]);
 
-  if (uploadProgress !== null) {
+  if (isUploading || uploadProgress !== null) {
     return (
       <Html center>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md text-center">
