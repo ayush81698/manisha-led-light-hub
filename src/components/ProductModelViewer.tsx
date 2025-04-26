@@ -12,6 +12,10 @@ interface ModelProps {
 // Cache for already validated models to prevent unnecessary refetching
 const validatedModelsCache = new Map<string, string>();
 
+// Constants for Supabase configuration - use directly instead of trying to access protected properties
+const SUPABASE_URL = "https://vuocrrpygfcasvvgwnaf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1b2NycnB5Z2ZjYXN2dmd3bmFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyNTM5ODAsImV4cCI6MjA2MDgyOTk4MH0.B9kX4PBgtcjJ1_rGrV24Jg1Ewe50z1dKEhDdM8LM5vw";
+
 function Model({ modelUrl }: ModelProps) {
   const [error, setError] = useState<string | null>(null);
   const [validatedModelUrl, setValidatedModelUrl] = useState<string | null>(null);
@@ -95,15 +99,12 @@ function Model({ modelUrl }: ModelProps) {
               const { data: sessionData } = await supabase.auth.getSession();
               const token = sessionData?.session?.access_token || '';
               
-              // Use environment variables from our Supabase client config
-              const supabaseUrl = `${supabase.getUrl()}`;
-              
               // First try creating bucket with REST API
-              const createBucketResponse = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
+              const createBucketResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,
-                  'apikey': supabase.getAuth().getCodeVerifier(),
+                  'apikey': SUPABASE_ANON_KEY,
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -128,11 +129,11 @@ function Model({ modelUrl }: ModelProps) {
               }
               
               // Set bucket to public
-              const publicBucketResponse = await fetch(`${supabaseUrl}/storage/v1/bucket/product-models`, {
+              const publicBucketResponse = await fetch(`${SUPABASE_URL}/storage/v1/bucket/product-models`, {
                 method: 'PUT',
                 headers: {
                   'Authorization': `Bearer ${token}`,
-                  'apikey': supabase.getAuth().getCodeVerifier(),
+                  'apikey': SUPABASE_ANON_KEY,
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
