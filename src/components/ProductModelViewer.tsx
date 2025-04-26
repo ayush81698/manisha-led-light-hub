@@ -90,16 +90,20 @@ function Model({ modelUrl }: ModelProps) {
           if (!bucketExists) {
             console.log("Bucket 'product-models' doesn't exist, creating it");
             
-            // Use the REST API directly for bucket creation to handle permission issues better
             try {
-              const token = supabase.auth.session()?.access_token || '';
+              // Get authentication token - using getSession() instead of directly accessing session
+              const { data: sessionData } = await supabase.auth.getSession();
+              const token = sessionData?.session?.access_token || '';
+              
+              // Use environment variables from our Supabase client config
+              const supabaseUrl = `${supabase.getUrl()}`;
               
               // First try creating bucket with REST API
-              const createBucketResponse = await fetch(`${supabase.supabaseUrl}/storage/v1/bucket`, {
+              const createBucketResponse = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,
-                  'apikey': supabase.supabaseKey,
+                  'apikey': supabase.getAuth().getCodeVerifier(),
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -124,11 +128,11 @@ function Model({ modelUrl }: ModelProps) {
               }
               
               // Set bucket to public
-              const publicBucketResponse = await fetch(`${supabase.supabaseUrl}/storage/v1/bucket/product-models`, {
+              const publicBucketResponse = await fetch(`${supabaseUrl}/storage/v1/bucket/product-models`, {
                 method: 'PUT',
                 headers: {
                   'Authorization': `Bearer ${token}`,
-                  'apikey': supabase.supabaseKey,
+                  'apikey': supabase.getAuth().getCodeVerifier(),
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
