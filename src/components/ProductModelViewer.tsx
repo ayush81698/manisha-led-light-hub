@@ -28,6 +28,22 @@ function Model({ modelUrl }: ModelProps) {
       
       console.log("Processing model URL:", modelUrl);
       
+      // If it's already a Supabase URL, use it directly
+      if (modelUrl.includes('supabase') && modelUrl.includes('product-models')) {
+        console.log("Already a Supabase URL, using directly");
+        setValidatedModelUrl(modelUrl);
+        validatedModelsCache.set(modelUrl, modelUrl);
+        return;
+      }
+      
+      // For other valid URLs that are not blob URLs
+      if (!modelUrl.startsWith('blob:')) {
+        console.log("Using external URL directly:", modelUrl);
+        setValidatedModelUrl(modelUrl);
+        validatedModelsCache.set(modelUrl, modelUrl);
+        return;
+      }
+      
       // If it's a blob URL, we need to upload it to Supabase storage
       if (modelUrl.startsWith('blob:')) {
         setIsUploading(true);
@@ -55,126 +71,134 @@ function Model({ modelUrl }: ModelProps) {
           
           setUploadProgress(10);
           
-          // Create bucket if it doesn't exist
-          try {
-            const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-            
-            if (listError) {
-              console.error('Error listing buckets:', listError);
-              setError('Failed to check storage buckets');
-              setUploadProgress(null);
-              setIsUploading(false);
-              return;
-            }
-            
-            const bucketExists = buckets?.some(bucket => bucket.name === 'product-models');
-            
-            if (!bucketExists) {
-              console.log("Bucket 'product-models' doesn't exist, creating it");
-              const { error: bucketError } = await supabase.storage.createBucket('product-models', {
-                public: true
-              });
-              
-              if (bucketError) {
-                console.error('Error creating bucket:', bucketError);
-                setError(`Failed to create storage bucket: ${bucketError.message}`);
-                setUploadProgress(null);
-                setIsUploading(false);
-                return;
-              }
-            }
-            
-            // Upload to Supabase storage
-            setUploadProgress(30);
-            const { data: uploadData, error: uploadError } = await supabase.storage
-              .from('product-models')
-              .upload(fileName, blobFile, {
-                contentType: 'model/gltf-binary',
-                cacheControl: '3600'
-              });
-
-            if (uploadError) {
-              console.error('Upload error:', uploadError);
-              setError('Failed to upload 3D model: ' + uploadError.message);
-              setUploadProgress(null);
-              setIsUploading(false);
-              return;
-            }
-            
-            setUploadProgress(75);
-            console.log("Upload successful:", uploadData);
-
-            // Get public URL
-            const { data: urlData } = supabase.storage
-              .from('product-models')
-              .getPublicUrl(fileName);
-
-            if (!urlData || !urlData.publicUrl) {
-              console.error("Failed to get public URL");
-              setError('Failed to get public URL for the uploaded model');
-              setUploadProgress(null);
-              setIsUploading(false);
-              return;
-            }
-            
-            console.log("Public URL:", urlData.publicUrl);
-            const finalUrl = urlData.publicUrl;
-            setValidatedModelUrl(finalUrl);
-            validatedModelsCache.set(modelUrl, finalUrl);
-            setUploadProgress(100);
-            
-            // Add a short delay to ensure the URL is accessible
-            setTimeout(() => {
-              setUploadProgress(null);
-              setIsUploading(false);
-            }, 1500);
-          } catch (bucketErr) {
-            console.error("Bucket creation error:", bucketErr);
-            setError('Error with storage bucket: ' + (bucketErr instanceof Error ? bucketErr.message : String(bucketErr)));
+          // First check if bucket exists
+          const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+          
+          setUploadProgress(20);
+          
+          if (listError) {
+            console.error('Error listing buckets:', listError);
+            setError('Failed to access storage');
             setUploadProgress(null);
             setIsUploading(false);
             return;
           }
+          
+          const bucketExists = buckets?.some(bucket => bucket.name === 'product-models');
+          
+          // Create bucket if it doesn't exist
+          if (!bucketExists) {
+            console.log("Bucket 'product-models' doesn't exist, creating it");
+            
+            // Use the REST API directly for bucket creation to handle permission issues better
+            try {
+              const token = supabase.auth.session()?.access_token || '';
+              
+              // First try creating bucket with REST API
+              const createBucketResponse = await fetch(`${supabase.supabaseUrl}/storage/v1/bucket`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'apikey': supabase.supabaseKey,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  id: 'product-models',
+                  name: 'product-models',
+                  public: true,
+                  file_size_limit: 100000000 // 100MB
+                })
+              });
+              
+              if (!createBucketResponse.ok) {
+                console.log('Direct REST API bucket creation failed, trying supabase client');
+                const { error: bucketError } = await supabase.storage.createBucket('product-models', {
+                  public: true,
+                  fileSizeLimit: 100000000 // 100MB
+                });
+                
+                if (bucketError) {
+                  console.error('Error creating bucket:', bucketError);
+                  throw new Error(`Failed to create storage bucket: ${bucketError.message}`);
+                }
+              }
+              
+              // Set bucket to public
+              const publicBucketResponse = await fetch(`${supabase.supabaseUrl}/storage/v1/bucket/product-models`, {
+                method: 'PUT',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'apikey': supabase.supabaseKey,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  public: true
+                })
+              });
+              
+              console.log('Public bucket response:', publicBucketResponse.ok);
+              
+            } catch (bucketErr) {
+              console.error("Bucket creation error:", bucketErr);
+              setError('Error with storage bucket: ' + (bucketErr instanceof Error ? bucketErr.message : String(bucketErr)));
+              setUploadProgress(null);
+              setIsUploading(false);
+              return;
+            }
+          }
+          
+          setUploadProgress(40);
+          console.log("Uploading file to bucket");
+          
+          // Upload to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('product-models')
+            .upload(fileName, blobFile, {
+              contentType: 'model/gltf-binary',
+              cacheControl: '3600'
+            });
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            setError('Failed to upload 3D model: ' + uploadError.message);
+            setUploadProgress(null);
+            setIsUploading(false);
+            return;
+          }
+          
+          setUploadProgress(80);
+          console.log("Upload successful:", uploadData);
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('product-models')
+            .getPublicUrl(fileName);
+
+          if (!urlData || !urlData.publicUrl) {
+            console.error("Failed to get public URL");
+            setError('Failed to get public URL for the uploaded model');
+            setUploadProgress(null);
+            setIsUploading(false);
+            return;
+          }
+          
+          console.log("Public URL:", urlData.publicUrl);
+          const finalUrl = urlData.publicUrl;
+          setValidatedModelUrl(finalUrl);
+          validatedModelsCache.set(modelUrl, finalUrl);
+          setUploadProgress(100);
+          
+          // Add a short delay to ensure the URL is accessible
+          setTimeout(() => {
+            setUploadProgress(null);
+            setIsUploading(false);
+          }, 1500);
+          
         } catch (uploadErr) {
           console.error("Upload exception:", uploadErr);
           setError('Exception during upload: ' + (uploadErr instanceof Error ? uploadErr.message : String(uploadErr)));
           setUploadProgress(null);
           setIsUploading(false);
-        }
-      } else {
-        console.log("Not a blob URL, validating normal URL:", modelUrl);
-        
-        // Check if it's already a Supabase URL
-        if (modelUrl.includes('supabase') && modelUrl.includes('product-models')) {
-          console.log("Already a Supabase URL, using directly");
-          setValidatedModelUrl(modelUrl);
-          validatedModelsCache.set(modelUrl, modelUrl);
-          return;
-        }
-        
-        // Validate existing URL
-        try {
-          const response = await fetch(modelUrl, { 
-            method: 'HEAD',
-            // Add this to avoid CORS issues
-            mode: 'no-cors' 
-          });
-          
-          // Since we're using no-cors, we can't check response.ok, so we assume it's valid
-          console.log("URL assumed valid (no-cors mode)");
-          setValidatedModelUrl(modelUrl);
-          validatedModelsCache.set(modelUrl, modelUrl);
-        } catch (fetchErr) {
-          console.error("URL fetch error:", fetchErr);
-          // If HEAD fails, let's try a direct fetch which might work better for some URLs
-          try {
-            console.log("Attempting direct model loading");
-            // Just set the URL directly and let three.js loader handle it
-            setValidatedModelUrl(modelUrl);
-            validatedModelsCache.set(modelUrl, modelUrl);
-          } catch (directErr) {
-            setError('Failed to validate model URL: ' + (directErr instanceof Error ? directErr.message : String(directErr)));
-          }
         }
       }
     } catch (err) {
