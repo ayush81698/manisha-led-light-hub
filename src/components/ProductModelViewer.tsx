@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html, Environment } from '@react-three/drei';
@@ -15,6 +16,9 @@ function Model({ modelUrl }: ModelProps) {
   const [validatedModelUrl, setValidatedModelUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
+  const [retries, setRetries] = useState<number>(0);
+  const [useArView, setUseArView] = useState<boolean>(false);
 
   const handleModelValidation = useCallback(async () => {
     try {
@@ -42,12 +46,35 @@ function Model({ modelUrl }: ModelProps) {
       setError(err instanceof Error ? err.message : String(err));
       setUploadProgress(null);
       setIsUploading(false);
+      
+      // Auto-retry on error with a limit
+      if (retries < 2) {
+        console.log(`Auto-retrying model load (attempt ${retries + 1})...`);
+        setRetries(prev => prev + 1);
+        setTimeout(() => handleModelValidation(), 1000);
+      }
     }
-  }, [modelUrl, isUploading]);
+  }, [modelUrl, isUploading, retries]);
 
   useEffect(() => {
     handleModelValidation();
   }, [handleModelValidation]);
+  
+  // Check if device supports AR
+  useEffect(() => {
+    const checkArSupport = () => {
+      // Check if the browser supports WebXR
+      if ('xr' in navigator) {
+        return true;
+      }
+      // iOS devices with AR QuickLook support
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+      return isIOS;
+    };
+    
+    setUseArView(checkArSupport());
+  }, []);
 
   if (isUploading || uploadProgress !== null) {
     return <UploadProgress progress={uploadProgress || 0} />;
@@ -66,18 +93,64 @@ function Model({ modelUrl }: ModelProps) {
     );
   }
 
-  if (!validatedModelUrl) {
+  if (useArView && validatedModelUrl) {
+    return (
+      <div className="w-full h-full flex flex-col">
+        <model-viewer 
+          src={validatedModelUrl}
+          alt="3D Model"
+          auto-rotate
+          camera-controls
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          environment-image="neutral"
+          shadow-intensity="1"
+          style={{width: '100%', height: '100%'}}
+          loading="eager"
+          reveal="auto"
+        >
+          <div slot="poster" className="flex items-center justify-center h-full w-full bg-gray-100">
+            <HamsterLoader />
+          </div>
+          <button slot="ar-button" className="absolute bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-md shadow-md z-10">
+            View in AR
+          </button>
+        </model-viewer>
+      </div>
+    );
+  }
+
+  if (!validatedModelUrl || !isModelLoaded) {
     return <Html center><HamsterLoader /></Html>;
   }
 
   return (
     <Suspense fallback={<Html center><HamsterLoader /></Html>}>
-      <ModelContent validatedModelUrl={validatedModelUrl} />
+      <ModelContent 
+        validatedModelUrl={validatedModelUrl} 
+        onLoaded={() => setIsModelLoaded(true)} 
+      />
     </Suspense>
   );
 }
 
 export const ProductModelViewer: React.FC<ModelProps> = ({ modelUrl }) => {
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load Google Model Viewer script if not already loaded
+    if (!document.querySelector('script#model-viewer-script')) {
+      const script = document.createElement('script');
+      script.id = 'model-viewer-script';
+      script.type = 'module';
+      script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+      script.onload = () => setScriptLoaded(true);
+      document.head.appendChild(script);
+    } else {
+      setScriptLoaded(true);
+    }
+  }, []);
+
   if (!modelUrl) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -93,13 +166,13 @@ export const ProductModelViewer: React.FC<ModelProps> = ({ modelUrl }) => {
     >
       <color attach="background" args={['#f0f0f0']} />
       <ambientLight intensity={1.5} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
+      <pointLight position={[-10, -10, -10]} intensity={0.8} />
       <Suspense fallback={<Html center><HamsterLoader /></Html>}>
         <Model modelUrl={modelUrl} />
         <Environment preset="studio" />
       </Suspense>
-      <OrbitControls enableZoom={true} autoRotate={true} autoRotateSpeed={1} />
+      <OrbitControls enableZoom={true} autoRotate={false} autoRotateSpeed={1} />
     </Canvas>
   );
 };

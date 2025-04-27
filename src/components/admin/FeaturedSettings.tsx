@@ -60,16 +60,26 @@ const FeaturedSettings = () => {
       // Clean up YouTube URL if applicable
       let finalSettings = {...settings};
       if (settings.backgroundType === 'video' && settings.backgroundValue) {
-        finalSettings.backgroundValue = cleanYoutubeUrl(settings.backgroundValue);
+        try {
+          finalSettings.backgroundValue = cleanYoutubeUrl(settings.backgroundValue);
+        } catch (error) {
+          console.error('Error cleaning YouTube URL:', error);
+          toast({
+            title: "Invalid YouTube URL",
+            description: "Please enter a valid YouTube URL",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return;
+        }
       }
 
+      console.log("Saving settings to Supabase:", finalSettings);
       const { error } = await supabase
         .from('settings')
         .upsert({
           name: 'featuredSettings',
           value: finalSettings as unknown as Json
-        }, {
-          onConflict: 'name'
         });
 
       if (error) {
@@ -94,25 +104,23 @@ const FeaturedSettings = () => {
     }
   };
 
-  const getYoutubeId = (url: string): string => {
-    if (!url) return '';
+  const getYoutubeId = (url: string): string | null => {
+    if (!url) return null;
     
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     
-    return (match && match[2].length === 11)
-      ? match[2]
-      : url;
+    return (match && match[2].length === 11) ? match[2] : null;
   };
   
   // Function to clean and validate YouTube URLs
   const cleanYoutubeUrl = (url: string): string => {
     const videoId = getYoutubeId(url);
-    if (videoId.length === 11) {
+    if (videoId) {
       // Return a standardized YouTube URL format
       return `https://www.youtube.com/watch?v=${videoId}`;
     }
-    return url; // If not a valid YouTube URL, return as is
+    throw new Error("Invalid YouTube URL");
   };
 
   return (
@@ -177,8 +185,10 @@ const FeaturedSettings = () => {
           {settings.backgroundType === 'video' && settings.backgroundValue && (
             <div className="mt-4 p-2 bg-gray-50 rounded-md dark:bg-gray-700 dark:text-white">
               <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">Preview YouTube Video ID:</p>
-              <code className="text-xs bg-gray-100 p-1 rounded dark:bg-gray-800">{getYoutubeId(settings.backgroundValue)}</code>
-              {getYoutubeId(settings.backgroundValue).length !== 11 && (
+              <code className="text-xs bg-gray-100 p-1 rounded dark:bg-gray-800">
+                {getYoutubeId(settings.backgroundValue) || "Invalid URL"}
+              </code>
+              {!getYoutubeId(settings.backgroundValue) && (
                 <p className="text-xs text-red-500 mt-1">
                   Warning: This doesn't appear to be a valid YouTube video ID. Please provide a valid YouTube URL.
                 </p>

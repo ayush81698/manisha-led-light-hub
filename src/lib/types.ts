@@ -4,4 +4,19 @@ export interface SectionSettings {
   backgroundValue: string;
 }
 
-export interface HeroSettings extends SectionSettings {}
+export type HeroSettings = SectionSettings;
+
+// Type declaration for Google's Model Viewer properties
+export interface ModelViewerProps {
+  src: string;
+  alt: string;
+  autoRotate?: boolean;
+  cameraControls?: boolean;
+  ar?: boolean;
+  arModes?: string;
+  environmentImage?: string;
+  shadowIntensity?: string;
+  loading?: 'eager' | 'lazy' | 'auto';
+  reveal?: 'auto' | 'interaction' | 'manual';
+  style?: React.CSSProperties;
+}
