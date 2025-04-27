@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Html, Environment } from '@react-three/drei';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
 import { validateModelUrl } from '@/utils/modelValidation';
 import { ModelContent } from './ModelContent';
@@ -32,7 +31,6 @@ function Model({ modelUrl }: ModelProps) {
       
       setValidatedModelUrl(url);
       
-      // Add a short delay to ensure the URL is accessible
       if (isUploading) {
         setTimeout(() => {
           setUploadProgress(null);
@@ -93,11 +91,13 @@ export const ProductModelViewer: React.FC<ModelProps> = ({ modelUrl }) => {
       camera={{ position: [0, 0, 5], fov: 45 }}
       style={{ width: '100%', height: '100%' }}
     >
-      <ambientLight intensity={0.5} />
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-      <pointLight position={[-10, -10, -10]} />
+      <color attach="background" args={['#f0f0f0']} />
+      <ambientLight intensity={1.5} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} />
       <Suspense fallback={<Html center><HamsterLoader /></Html>}>
         <Model modelUrl={modelUrl} />
+        <Environment preset="studio" />
       </Suspense>
       <OrbitControls enableZoom={true} autoRotate={true} autoRotateSpeed={1} />
     </Canvas>

@@ -39,7 +39,30 @@ export const ModelContent: React.FC<ModelContentProps> = ({ validatedModelUrl })
       );
     }
     
-    return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
+    // Process materials to ensure proper color rendering
+    scene.traverse((node) => {
+      if (node instanceof THREE.Mesh) {
+        if (node.material) {
+          // Handle material types
+          if (Array.isArray(node.material)) {
+            node.material.forEach((mat) => {
+              ensureProperMaterial(mat);
+            });
+          } else {
+            ensureProperMaterial(node.material);
+          }
+        }
+      }
+    });
+    
+    return (
+      <>
+        <ambientLight intensity={1.5} />
+        <directionalLight position={[5, 10, 5]} intensity={1.5} />
+        <directionalLight position={[-5, -10, -5]} intensity={0.5} />
+        <primitive object={scene} scale={1.5} position={[0, 0, 0]} />
+      </>
+    );
   } catch (error) {
     console.error("GLTF loading error:", error);
     return (
@@ -54,3 +77,27 @@ export const ModelContent: React.FC<ModelContentProps> = ({ validatedModelUrl })
     );
   }
 };
+
+// Helper function to ensure materials are properly configured
+function ensureProperMaterial(material: THREE.Material) {
+  if (material instanceof THREE.MeshStandardMaterial) {
+    // Enhance standard materials
+    material.roughness = Math.min(material.roughness, 0.7); // Reduce roughness if too high
+    material.metalness = Math.max(material.metalness, 0.2); // Ensure some metalness for better reflections
+    
+    // Preserve original color but enhance if too dark
+    if (material.color && material.color.r + material.color.g + material.color.b < 0.2) {
+      material.color.multiplyScalar(1.5); // Brighten dark colors
+    }
+  } else if (material instanceof THREE.MeshBasicMaterial) {
+    // Basic materials might need more color enhancement
+    if (material.color && material.color.r + material.color.g + material.color.b < 0.1) {
+      material.color.multiplyScalar(2); // Significantly brighten very dark colors
+    }
+  }
+  
+  // Ensure material takes lighting into account if it's not already
+  if (material.hasOwnProperty('flatShading') && material.flatShading === true) {
+    (material as any).flatShading = false; // Use smooth shading
+  }
+}

@@ -57,18 +57,27 @@ const FeaturedSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Clean up YouTube URL if applicable
+      let finalSettings = {...settings};
+      if (settings.backgroundType === 'video' && settings.backgroundValue) {
+        finalSettings.backgroundValue = cleanYoutubeUrl(settings.backgroundValue);
+      }
+
       const { error } = await supabase
         .from('settings')
         .upsert({
           name: 'featuredSettings',
-          value: settings as unknown as Json
+          value: finalSettings as unknown as Json
         }, {
           onConflict: 'name'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving settings to DB:', error);
+        throw error;
+      }
 
-      localStorage.setItem('featuredSettings', JSON.stringify(settings));
+      localStorage.setItem('featuredSettings', JSON.stringify(finalSettings));
       toast({
         title: "Settings saved",
         description: "Featured section settings have been updated successfully."
@@ -94,6 +103,16 @@ const FeaturedSettings = () => {
     return (match && match[2].length === 11)
       ? match[2]
       : url;
+  };
+  
+  // Function to clean and validate YouTube URLs
+  const cleanYoutubeUrl = (url: string): string => {
+    const videoId = getYoutubeId(url);
+    if (videoId.length === 11) {
+      // Return a standardized YouTube URL format
+      return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+    return url; // If not a valid YouTube URL, return as is
   };
 
   return (
@@ -156,9 +175,14 @@ const FeaturedSettings = () => {
           )}
           
           {settings.backgroundType === 'video' && settings.backgroundValue && (
-            <div className="mt-4 p-2 bg-gray-50 rounded-md">
-              <p className="text-sm text-gray-500 mb-2">Preview YouTube Video ID:</p>
-              <code className="text-xs bg-gray-100 p-1 rounded">{getYoutubeId(settings.backgroundValue)}</code>
+            <div className="mt-4 p-2 bg-gray-50 rounded-md dark:bg-gray-700 dark:text-white">
+              <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">Preview YouTube Video ID:</p>
+              <code className="text-xs bg-gray-100 p-1 rounded dark:bg-gray-800">{getYoutubeId(settings.backgroundValue)}</code>
+              {getYoutubeId(settings.backgroundValue).length !== 11 && (
+                <p className="text-xs text-red-500 mt-1">
+                  Warning: This doesn't appear to be a valid YouTube video ID. Please provide a valid YouTube URL.
+                </p>
+              )}
             </div>
           )}
         </div>
