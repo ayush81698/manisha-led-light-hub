@@ -97,7 +97,14 @@ function ensureProperMaterial(material: THREE.Material) {
   }
   
   // Ensure material takes lighting into account if it's not already
-  if (material.hasOwnProperty('flatShading') && material.flatShading === true) {
-    (material as any).flatShading = false; // Use smooth shading
+  // Check for flatShading only on materials that support this property
+  if (material instanceof THREE.MeshLambertMaterial || 
+      material instanceof THREE.MeshPhongMaterial || 
+      material instanceof THREE.MeshStandardMaterial || 
+      material instanceof THREE.MeshPhysicalMaterial) {
+    if (material.flatShading === true) {
+      material.flatShading = false; // Use smooth shading
+      material.needsUpdate = true;  // Make sure to update the material
+    }
   }
 }
