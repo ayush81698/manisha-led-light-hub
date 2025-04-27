@@ -77,10 +77,13 @@ function Model({ modelUrl }: ModelProps) {
     setUseArView(checkArSupport());
   }, []);
 
+  // If we're uploading or have upload progress, show the upload progress component
   if (isUploading || uploadProgress !== null) {
-    return <UploadProgress progress={uploadProgress || 0} />;
+    // This will be displayed outside the Canvas
+    return null;
   }
 
+  // If there's an error, render the error message
   if (error) {
     return (
       <Html center>
@@ -94,8 +97,96 @@ function Model({ modelUrl }: ModelProps) {
     );
   }
 
+  // Special case: AR view is purely handled through model-viewer outside the Canvas
   if (useArView && validatedModelUrl) {
-    // Using Google's model viewer for AR functionality
+    // For AR, we'll return null here because we'll handle AR view outside the Canvas
+    return null;
+  }
+
+  if (!validatedModelUrl || !isModelLoaded) {
+    return <Html center><HamsterLoader /></Html>;
+  }
+
+  return (
+    <Suspense fallback={<Html center><HamsterLoader /></Html>}>
+      <ModelContent 
+        validatedModelUrl={validatedModelUrl} 
+        onLoaded={() => setIsModelLoaded(true)} 
+      />
+    </Suspense>
+  );
+}
+
+export const ProductModelViewer: React.FC<ModelProps> = ({ modelUrl }) => {
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  // Get model validation state from the Model component
+  const [validatedModelUrl, setValidatedModelUrl] = useState<string | null>(null);
+  const [useArView, setUseArView] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // Handle model validation at this level to access the URL for AR
+  const handleModelValidation = useCallback(async () => {
+    try {
+      if (!modelUrl) return;
+
+      const url = await validateModelUrl(
+        modelUrl,
+        (progress) => setUploadProgress(progress),
+        (uploading) => setIsUploading(uploading)
+      );
+      
+      setValidatedModelUrl(url);
+    } catch (error) {
+      console.error('Model validation error:', error);
+    }
+  }, [modelUrl]);
+
+  useEffect(() => {
+    handleModelValidation();
+  }, [handleModelValidation]);
+
+  useEffect(() => {
+    // Load Google Model Viewer script if not already loaded
+    if (!document.querySelector('script#model-viewer-script')) {
+      const script = document.createElement('script');
+      script.id = 'model-viewer-script';
+      script.type = 'module';
+      script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+      script.onload = () => setScriptLoaded(true);
+      document.head.appendChild(script);
+    } else {
+      setScriptLoaded(true);
+    }
+
+    // Check if device supports AR
+    const checkArSupport = () => {
+      if ('xr' in navigator) {
+        return true;
+      }
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+      return isIOS;
+    };
+    
+    setUseArView(checkArSupport());
+  }, []);
+
+  if (!modelUrl) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <p className="text-gray-500 dark:text-gray-400">No 3D model available</p>
+      </div>
+    );
+  }
+
+  // Show upload progress outside of the Canvas
+  if (isUploading || uploadProgress !== null) {
+    return <UploadProgress progress={uploadProgress || 0} />;
+  }
+
+  // If we have AR support and a validated model URL, use the model-viewer
+  if (useArView && validatedModelUrl && scriptLoaded) {
     return (
       <div className="w-full h-full flex flex-col">
         <model-viewer 
@@ -124,45 +215,7 @@ function Model({ modelUrl }: ModelProps) {
     );
   }
 
-  if (!validatedModelUrl || !isModelLoaded) {
-    return <Html center><HamsterLoader /></Html>;
-  }
-
-  return (
-    <Suspense fallback={<Html center><HamsterLoader /></Html>}>
-      <ModelContent 
-        validatedModelUrl={validatedModelUrl} 
-        onLoaded={() => setIsModelLoaded(true)} 
-      />
-    </Suspense>
-  );
-}
-
-export const ProductModelViewer: React.FC<ModelProps> = ({ modelUrl }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-
-  useEffect(() => {
-    // Load Google Model Viewer script if not already loaded
-    if (!document.querySelector('script#model-viewer-script')) {
-      const script = document.createElement('script');
-      script.id = 'model-viewer-script';
-      script.type = 'module';
-      script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
-      script.onload = () => setScriptLoaded(true);
-      document.head.appendChild(script);
-    } else {
-      setScriptLoaded(true);
-    }
-  }, []);
-
-  if (!modelUrl) {
-    return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <p className="text-gray-500 dark:text-gray-400">No 3D model available</p>
-      </div>
-    );
-  }
-
+  // For non-AR view, use React Three Fiber
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 45 }}
