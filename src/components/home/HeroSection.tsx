@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { themeColors } from '@/lib/theme-colors';
 import { HeroSettings } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -13,14 +14,36 @@ const HeroSection = () => {
   });
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem('heroSettings');
-    if (savedSettings) {
+    const loadSettings = async () => {
       try {
-        setSettings(JSON.parse(savedSettings));
+        // Try to get settings from Supabase
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('name', 'heroSettings')
+          .single();
+          
+        if (error) {
+          console.error('Error loading hero settings from DB:', error);
+          
+          // Fallback to localStorage if DB fetch fails
+          const savedSettings = localStorage.getItem('heroSettings');
+          if (savedSettings) {
+            try {
+              setSettings(JSON.parse(savedSettings));
+            } catch (error) {
+              console.error('Error parsing hero settings from localStorage:', error);
+            }
+          }
+        } else if (data && data.value) {
+          setSettings(data.value);
+        }
       } catch (error) {
-        console.error('Error parsing hero settings:', error);
+        console.error('Failed to load hero settings:', error);
       }
-    }
+    };
+    
+    loadSettings();
   }, []);
 
   const handleContactSales = () => {
@@ -71,10 +94,11 @@ const HeroSection = () => {
             allowFullScreen
             style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100vw', height: '100vh', pointerEvents: 'none' }}
           />
+          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
         </div>
       )}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-2xl mx-auto text-center bg-black bg-opacity-40 p-6 rounded-lg">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Premium LED Light Housings
           </h1>

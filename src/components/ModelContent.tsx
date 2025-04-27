@@ -10,9 +10,9 @@ interface ModelContentProps {
 export const ModelContent: React.FC<ModelContentProps> = ({ validatedModelUrl }) => {
   try {
     console.log("Loading 3D model from URL:", validatedModelUrl);
-    const gltf = useGLTF(validatedModelUrl, true);
+    const { scene } = useGLTF(validatedModelUrl, true);
     
-    if (!gltf || !gltf.scene) {
+    if (!scene) {
       console.error("GLTF loading issue - scene not available");
       return (
         <Html center>
@@ -26,7 +26,7 @@ export const ModelContent: React.FC<ModelContentProps> = ({ validatedModelUrl })
       );
     }
     
-    return <primitive object={gltf.scene} scale={1.5} position={[0, 0, 0]} />;
+    return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
   } catch (err) {
     console.error("Error loading 3D model:", err);
     return (

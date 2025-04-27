@@ -7,30 +7,81 @@ import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import type { SectionSettings } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const FeaturedSettings = () => {
   const [settings, setSettings] = useState<SectionSettings>({
     backgroundType: 'color',
     backgroundValue: '#f9fafb'
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem('featuredSettings');
-    if (savedSettings) {
+    const loadSettings = async () => {
       try {
-        setSettings(JSON.parse(savedSettings));
+        // First try to get from Supabase
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('name', 'featuredSettings')
+          .single();
+          
+        if (error) {
+          console.error('Error loading featured settings from DB:', error);
+          
+          // Fallback to localStorage
+          const savedSettings = localStorage.getItem('featuredSettings');
+          if (savedSettings) {
+            try {
+              setSettings(JSON.parse(savedSettings));
+            } catch (error) {
+              console.error('Error parsing featured settings from localStorage:', error);
+            }
+          }
+        } else if (data && data.value) {
+          setSettings(data.value);
+        }
       } catch (error) {
-        console.error('Error parsing featured settings:', error);
+        console.error('Failed to load featured settings:', error);
       }
-    }
+    };
+    
+    loadSettings();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('featuredSettings', JSON.stringify(settings));
-    toast({
-      title: "Settings saved",
-      description: "Featured products section settings have been updated successfully."
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Save to Supabase
+      const { error: upsertError } = await supabase
+        .from('settings')
+        .upsert({ 
+          name: 'featuredSettings', 
+          value: settings 
+        }, { 
+          onConflict: 'name' 
+        });
+
+      if (upsertError) {
+        console.error('Error saving to database:', upsertError);
+        // Fallback to localStorage
+        localStorage.setItem('featuredSettings', JSON.stringify(settings));
+      }
+
+      toast({
+        title: "Settings saved",
+        description: "Featured products section settings have been updated successfully."
+      });
+    } catch (error) {
+      console.error('Failed to save featured settings:', error);
+      toast({
+        title: "Error saving settings",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getYoutubeId = (url: string): string => {
@@ -42,7 +93,7 @@ const FeaturedSettings = () => {
     
     return (match && match[2].length === 11)
       ? match[2]
-      : url; // Return the original string if it doesn't match
+      : url;
   };
 
   return (
@@ -112,7 +163,9 @@ const FeaturedSettings = () => {
           )}
         </div>
 
-        <Button onClick={handleSave}>Save Changes</Button>
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
       </CardContent>
     </Card>
   );

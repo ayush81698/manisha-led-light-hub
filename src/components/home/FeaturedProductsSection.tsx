@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductCarousel from './ProductCarousel';
 import { SectionSettings } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeaturedProductsSectionProps {
   products: any[];
@@ -14,14 +15,36 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
   });
 
   useEffect(() => {
-    const savedSettings = localStorage.getItem('featuredSettings');
-    if (savedSettings) {
+    const loadSettings = async () => {
       try {
-        setSettings(JSON.parse(savedSettings));
+        // Try to get settings from Supabase
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('name', 'featuredSettings')
+          .single();
+          
+        if (error) {
+          console.error('Error loading featured settings from DB:', error);
+          
+          // Fallback to localStorage if DB fetch fails
+          const savedSettings = localStorage.getItem('featuredSettings');
+          if (savedSettings) {
+            try {
+              setSettings(JSON.parse(savedSettings));
+            } catch (error) {
+              console.error('Error parsing featured settings from localStorage:', error);
+            }
+          }
+        } else if (data && data.value) {
+          setSettings(data.value);
+        }
       } catch (error) {
-        console.error('Error parsing featured settings:', error);
+        console.error('Failed to load featured settings:', error);
       }
-    }
+    };
+    
+    loadSettings();
   }, []);
 
   const getYoutubeId = (url: string): string => {
@@ -62,7 +85,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
   return (
     <section className="py-16 relative dark:bg-gray-900" style={getBackgroundStyle()}>
       {settings.backgroundType === 'image' && (
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-70"></div>
       )}
       
       {settings.backgroundType === 'video' && (
@@ -82,7 +105,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
               pointerEvents: 'none' 
             }}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-70"></div>
         </div>
       )}
       
