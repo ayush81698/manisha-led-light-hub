@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 import type { HeroSettings as HeroSettingsType } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
@@ -16,6 +18,8 @@ const HeroSettings = () => {
     backgroundValue: '#0047AB'
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [saveMode, setSaveMode] = useState<'both' | 'local'>('both');
+  const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -28,6 +32,10 @@ const HeroSettings = () => {
           
         if (error) {
           console.error('Error loading hero settings from DB:', error);
+          setDbError(`Database access error: ${error.message}`);
+          setSaveMode('local');
+          
+          // Try to load from localStorage instead
           const savedSettings = localStorage.getItem('heroSettings');
           if (savedSettings) {
             setSettings(JSON.parse(savedSettings));
@@ -48,6 +56,12 @@ const HeroSettings = () => {
         }
       } catch (error) {
         console.error('Failed to load hero settings:', error);
+        
+        // Try to load from localStorage as fallback
+        const savedSettings = localStorage.getItem('heroSettings');
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings));
+        }
       }
     };
     
@@ -74,23 +88,39 @@ const HeroSettings = () => {
         }
       }
 
-      console.log("Saving settings to Supabase:", finalSettings);
-      const { error } = await supabase
-        .from('settings')
-        .upsert({
-          name: 'heroSettings',
-          value: finalSettings as unknown as Json
-        });
-
-      if (error) {
-        console.error('Error saving settings to DB:', error);
-        throw error;
-      }
-
+      // Always save to localStorage
       localStorage.setItem('heroSettings', JSON.stringify(finalSettings));
+      
+      // Only attempt to save to database if in 'both' mode
+      if (saveMode === 'both') {
+        console.log("Saving settings to Supabase:", finalSettings);
+        const { error } = await supabase
+          .from('settings')
+          .upsert({
+            name: 'heroSettings',
+            value: finalSettings as unknown as Json
+          });
+
+        if (error) {
+          console.error('Error saving settings to DB:', error);
+          setDbError(`Database save error: ${error.message}`);
+          setSaveMode('local');
+          
+          toast({
+            title: "Settings saved locally only",
+            description: "Could not save to database due to permissions. Settings saved to browser storage.",
+            variant: "warning"
+          });
+          
+          return;
+        }
+      }
+      
       toast({
         title: "Settings saved",
-        description: "Hero section settings have been updated successfully."
+        description: saveMode === 'both' 
+          ? "Hero section settings have been updated successfully."
+          : "Settings saved to browser storage only.",
       });
     } catch (error) {
       console.error('Failed to save hero settings:', error);
@@ -127,8 +157,24 @@ const HeroSettings = () => {
     <Card>
       <CardHeader>
         <CardTitle>Hero Section Settings</CardTitle>
+        {dbError && (
+          <CardDescription className="text-amber-500">
+            Using local storage mode due to database access restrictions
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
+        {dbError && (
+          <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
+            <InfoCircledIcon className="h-4 w-4" />
+            <AlertTitle>Database Access Restricted</AlertTitle>
+            <AlertDescription>
+              {dbError}
+              <p className="mt-2">Your settings will be saved to browser local storage only and will not persist across devices.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="space-y-4">
           <RadioGroup
             value={settings.backgroundType}
@@ -198,7 +244,7 @@ const HeroSettings = () => {
         </div>
 
         <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          {isSaving ? 'Saving...' : `Save Changes${saveMode === 'local' ? ' (Local Only)' : ''}`}
         </Button>
       </CardContent>
     </Card>
@@ -206,3 +252,4 @@ const HeroSettings = () => {
 };
 
 export default HeroSettings;
+
