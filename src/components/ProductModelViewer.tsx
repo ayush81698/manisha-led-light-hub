@@ -6,6 +6,7 @@ import { HamsterLoader } from '@/components/ui/hamster-loader';
 import { validateModelUrl } from '@/utils/modelValidation';
 import { ModelContent } from './ModelContent';
 import { UploadProgress } from './UploadProgress';
+import { Button } from './ui/button';
 
 interface ModelProps {
   modelUrl: string;
@@ -94,6 +95,7 @@ function Model({ modelUrl }: ModelProps) {
   }
 
   if (useArView && validatedModelUrl) {
+    // Using Google's model viewer for AR functionality
     return (
       <div className="w-full h-full flex flex-col">
         <model-viewer 
@@ -112,9 +114,11 @@ function Model({ modelUrl }: ModelProps) {
           <div slot="poster" className="flex items-center justify-center h-full w-full bg-gray-100">
             <HamsterLoader />
           </div>
-          <button slot="ar-button" className="absolute bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-md shadow-md z-10">
-            View in AR
-          </button>
+          <div slot="ar-button" className="absolute bottom-4 right-4">
+            <Button className="bg-primary text-white px-4 py-2 rounded-md shadow-md z-10">
+              View in AR
+            </Button>
+          </div>
         </model-viewer>
       </div>
     );
