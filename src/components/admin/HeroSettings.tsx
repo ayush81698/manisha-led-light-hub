@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import type { HeroSettings as HeroSettingsType } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 const HeroSettings = () => {
   const [settings, setSettings] = useState<HeroSettingsType>({
@@ -31,7 +33,18 @@ const HeroSettings = () => {
             setSettings(JSON.parse(savedSettings));
           }
         } else if (settingsData?.value) {
-          setSettings(settingsData.value as HeroSettingsType);
+          // Cast to unknown first, then to the expected type
+          const parsedSettings = settingsData.value as unknown as HeroSettingsType;
+          
+          // Validate that the parsed settings have the expected structure
+          if (
+            parsedSettings && 
+            typeof parsedSettings === 'object' && 
+            'backgroundType' in parsedSettings && 
+            'backgroundValue' in parsedSettings
+          ) {
+            setSettings(parsedSettings);
+          }
         }
       } catch (error) {
         console.error('Failed to load hero settings:', error);
@@ -48,7 +61,7 @@ const HeroSettings = () => {
         .from('settings')
         .upsert({
           name: 'heroSettings',
-          value: settings
+          value: settings as unknown as Json
         }, {
           onConflict: 'name'
         });

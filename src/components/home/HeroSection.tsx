@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { themeColors } from '@/lib/theme-colors';
 import { HeroSettings } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -36,7 +37,18 @@ const HeroSection = () => {
             }
           }
         } else if (data && data.value) {
-          setSettings(data.value);
+          // Cast to unknown first, then to the expected type
+          const parsedSettings = data.value as unknown as HeroSettings;
+          
+          // Validate that the parsed settings have the expected structure
+          if (
+            parsedSettings && 
+            typeof parsedSettings === 'object' && 
+            'backgroundType' in parsedSettings && 
+            'backgroundValue' in parsedSettings
+          ) {
+            setSettings(parsedSettings);
+          }
         }
       } catch (error) {
         console.error('Failed to load hero settings:', error);

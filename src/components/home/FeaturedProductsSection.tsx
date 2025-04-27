@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCarousel from './ProductCarousel';
 import { SectionSettings } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface FeaturedProductsSectionProps {
   products: any[];
@@ -37,7 +38,18 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
             }
           }
         } else if (data && data.value) {
-          setSettings(data.value);
+          // Cast to unknown first, then to the expected type
+          const parsedSettings = data.value as unknown as SectionSettings;
+          
+          // Validate that the parsed settings have the expected structure
+          if (
+            parsedSettings && 
+            typeof parsedSettings === 'object' && 
+            'backgroundType' in parsedSettings && 
+            'backgroundValue' in parsedSettings
+          ) {
+            setSettings(parsedSettings);
+          }
         }
       } catch (error) {
         console.error('Failed to load featured settings:', error);

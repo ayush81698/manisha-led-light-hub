@@ -1,13 +1,9 @@
-export interface HeroSettings {
+
+export interface SectionSettings {
   backgroundType: 'image' | 'video' | 'color';
   backgroundValue: string;
 }
 
-interface SectionSettings {
-  backgroundType: 'image' | 'video' | 'color';
-  backgroundValue: string;
-}
-
-interface HeroSettings extends SectionSettings {}
+export interface HeroSettings extends SectionSettings {}
 
 export type { HeroSettings, SectionSettings };
