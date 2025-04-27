@@ -5,5 +5,3 @@ export interface SectionSettings {
 }
 
 export interface HeroSettings extends SectionSettings {}
-
-export type { HeroSettings, SectionSettings };

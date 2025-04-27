@@ -2,6 +2,7 @@
 import React from 'react';
 import { useGLTF } from '@react-three/drei';
 import { Html } from '@react-three/drei';
+import * as THREE from 'three';
 
 interface ModelContentProps {
   validatedModelUrl: string;
