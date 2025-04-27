@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,27 +18,20 @@ const FeaturedSettings = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        // First try to get from Supabase
-        const { data, error } = await supabase
+        const { data: settingsData, error } = await supabase
           .from('settings')
-          .select('*')
+          .select('value')
           .eq('name', 'featuredSettings')
-          .single();
+          .maybeSingle();
           
         if (error) {
           console.error('Error loading featured settings from DB:', error);
-          
-          // Fallback to localStorage
           const savedSettings = localStorage.getItem('featuredSettings');
           if (savedSettings) {
-            try {
-              setSettings(JSON.parse(savedSettings));
-            } catch (error) {
-              console.error('Error parsing featured settings from localStorage:', error);
-            }
+            setSettings(JSON.parse(savedSettings));
           }
-        } else if (data && data.value) {
-          setSettings(data.value);
+        } else if (settingsData?.value) {
+          setSettings(settingsData.value as SectionSettings);
         }
       } catch (error) {
         console.error('Failed to load featured settings:', error);
@@ -52,25 +44,21 @@ const FeaturedSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Save to Supabase
-      const { error: upsertError } = await supabase
+      const { error } = await supabase
         .from('settings')
-        .upsert({ 
-          name: 'featuredSettings', 
-          value: settings 
-        }, { 
-          onConflict: 'name' 
+        .upsert({
+          name: 'featuredSettings',
+          value: settings
+        }, {
+          onConflict: 'name'
         });
 
-      if (upsertError) {
-        console.error('Error saving to database:', upsertError);
-        // Fallback to localStorage
-        localStorage.setItem('featuredSettings', JSON.stringify(settings));
-      }
+      if (error) throw error;
 
+      localStorage.setItem('featuredSettings', JSON.stringify(settings));
       toast({
         title: "Settings saved",
-        description: "Featured products section settings have been updated successfully."
+        description: "Featured section settings have been updated successfully."
       });
     } catch (error) {
       console.error('Failed to save featured settings:', error);
@@ -87,7 +75,6 @@ const FeaturedSettings = () => {
   const getYoutubeId = (url: string): string => {
     if (!url) return '';
     
-    // Handle various YouTube URL formats
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     

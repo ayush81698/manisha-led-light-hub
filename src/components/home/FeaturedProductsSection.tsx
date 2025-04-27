@@ -105,7 +105,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
               pointerEvents: 'none' 
             }}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-70"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
         </div>
       )}
       
@@ -113,7 +113,9 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
         <h2 className={`text-3xl font-bold text-center mb-12 ${(settings.backgroundType === 'image' || settings.backgroundType === 'video') ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
           Featured Products
         </h2>
-        <ProductCarousel products={products} />
+        <div className="backdrop-blur-sm bg-black bg-opacity-30 p-8 rounded-lg">
+          <ProductCarousel products={products} />
+        </div>
       </div>
     </section>
   );

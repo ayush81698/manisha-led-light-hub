@@ -98,11 +98,11 @@ const HeroSection = () => {
         </div>
       )}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-2xl mx-auto text-center bg-black bg-opacity-40 p-6 rounded-lg">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+        <div className="max-w-2xl mx-auto text-center bg-black bg-opacity-60 backdrop-blur-sm p-8 rounded-lg shadow-lg">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
             Premium LED Light Housings
           </h1>
-          <p className="text-lg md:text-xl mb-8 text-gray-200">
+          <p className="text-lg md:text-xl mb-8 text-gray-100">
             Manisha Enterprises specializes in manufacturing high-quality LED light housings
             for industrial and commercial applications.
           </p>

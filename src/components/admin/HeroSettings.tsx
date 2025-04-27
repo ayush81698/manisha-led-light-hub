@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,27 +18,20 @@ const HeroSettings = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        // First try to get from Supabase
-        const { data, error } = await supabase
+        const { data: settingsData, error } = await supabase
           .from('settings')
-          .select('*')
+          .select('value')
           .eq('name', 'heroSettings')
-          .single();
+          .maybeSingle();
           
         if (error) {
           console.error('Error loading hero settings from DB:', error);
-          
-          // Fallback to localStorage
           const savedSettings = localStorage.getItem('heroSettings');
           if (savedSettings) {
-            try {
-              setSettings(JSON.parse(savedSettings));
-            } catch (error) {
-              console.error('Error parsing hero settings from localStorage:', error);
-            }
+            setSettings(JSON.parse(savedSettings));
           }
-        } else if (data && data.value) {
-          setSettings(data.value);
+        } else if (settingsData?.value) {
+          setSettings(settingsData.value as HeroSettingsType);
         }
       } catch (error) {
         console.error('Failed to load hero settings:', error);
@@ -52,22 +44,18 @@ const HeroSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Save to Supabase
-      const { error: upsertError } = await supabase
+      const { error } = await supabase
         .from('settings')
-        .upsert({ 
-          name: 'heroSettings', 
-          value: settings 
-        }, { 
-          onConflict: 'name' 
+        .upsert({
+          name: 'heroSettings',
+          value: settings
+        }, {
+          onConflict: 'name'
         });
 
-      if (upsertError) {
-        console.error('Error saving to database:', upsertError);
-        // Fallback to localStorage
-        localStorage.setItem('heroSettings', JSON.stringify(settings));
-      }
+      if (error) throw error;
 
+      localStorage.setItem('heroSettings', JSON.stringify(settings));
       toast({
         title: "Settings saved",
         description: "Hero section settings have been updated successfully."
@@ -87,7 +75,6 @@ const HeroSettings = () => {
   const getYoutubeId = (url: string): string => {
     if (!url) return '';
     
-    // Handle various YouTube URL formats
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     
