@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { AlertCircle } from 'lucide-react';
 import type { SectionSettings } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
@@ -109,7 +109,7 @@ const FeaturedSettings = () => {
           toast({
             title: "Settings saved locally only",
             description: "Could not save to database due to permissions. Settings saved to browser storage.",
-            variant: "warning"
+            variant: "destructive"
           });
           
           return;
@@ -165,8 +165,8 @@ const FeaturedSettings = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         {dbError && (
-          <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
-            <InfoCircledIcon className="h-4 w-4" />
+          <Alert variant="default" className="bg-amber-50 text-amber-800 border-amber-200">
+            <AlertCircle className="h-4 w-4" />
             <AlertTitle>Database Access Restricted</AlertTitle>
             <AlertDescription>
               {dbError}
@@ -252,4 +252,3 @@ const FeaturedSettings = () => {
 };
 
 export default FeaturedSettings;
-
