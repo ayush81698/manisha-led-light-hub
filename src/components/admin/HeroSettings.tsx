@@ -52,6 +52,9 @@ const HeroSettings = () => {
             'backgroundValue' in parsedSettings
           ) {
             setSettings(parsedSettings);
+            // Reset error state if we successfully loaded from DB
+            setDbError(null);
+            setSaveMode('both');
           }
         }
       } catch (error) {
@@ -113,6 +116,10 @@ const HeroSettings = () => {
           });
           
           return;
+        } else {
+          // Reset error state if save was successful
+          setDbError(null);
+          setSaveMode('both');
         }
       }
       
