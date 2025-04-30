@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -17,17 +16,14 @@ const HeroSection = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        // Try to get settings from Supabase
         const { data, error } = await supabase
           .from('settings')
           .select('*')
           .eq('name', 'heroSettings')
           .single();
-          
+        
         if (error) {
           console.error('Error loading hero settings from DB:', error);
-          
-          // Fallback to localStorage if DB fetch fails
           const savedSettings = localStorage.getItem('heroSettings');
           if (savedSettings) {
             try {
@@ -37,10 +33,7 @@ const HeroSection = () => {
             }
           }
         } else if (data && data.value) {
-          // Cast to unknown first, then to the expected type
           const parsedSettings = data.value as unknown as HeroSettings;
-          
-          // Validate that the parsed settings have the expected structure
           if (
             parsedSettings && 
             typeof parsedSettings === 'object' && 
@@ -64,11 +57,8 @@ const HeroSection = () => {
 
   const getYoutubeId = (url: string): string => {
     if (!url) return '';
-    
-    // Handle various YouTube URL formats
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
-    
     return (match && match[2].length === 11)
       ? match[2]
       : url;
@@ -96,15 +86,14 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative h-[600px] flex items-center justify-center text-white" style={getBackgroundStyle()}>
+    <div className="relative min-h-screen flex items-center justify-center text-white" style={getBackgroundStyle()}>
       {settings.backgroundType === 'video' && (
         <div className="absolute inset-0 pointer-events-none">
           <iframe
-            className="w-full h-full"
+            className="absolute top-0 left-0 w-screen h-screen object-cover pointer-events-none"
             src={`https://www.youtube.com/embed/${getYoutubeId(settings.backgroundValue)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${getYoutubeId(settings.backgroundValue)}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100vw', height: '100vh', pointerEvents: 'none' }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-60"></div>
         </div>
