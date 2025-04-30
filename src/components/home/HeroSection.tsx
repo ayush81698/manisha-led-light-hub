@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { themeColors } from '@/lib/theme-colors';
 import { HeroSettings } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
-import { Json } from '@/integrations/supabase/types';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -21,7 +19,7 @@ const HeroSection = () => {
           .select('*')
           .eq('name', 'heroSettings')
           .single();
-        
+
         if (error) {
           console.error('Error loading hero settings from DB:', error);
           const savedSettings = localStorage.getItem('heroSettings');
@@ -35,9 +33,9 @@ const HeroSection = () => {
         } else if (data && data.value) {
           const parsedSettings = data.value as unknown as HeroSettings;
           if (
-            parsedSettings && 
-            typeof parsedSettings === 'object' && 
-            'backgroundType' in parsedSettings && 
+            parsedSettings &&
+            typeof parsedSettings === 'object' &&
+            'backgroundType' in parsedSettings &&
             'backgroundValue' in parsedSettings
           ) {
             setSettings(parsedSettings);
@@ -47,7 +45,7 @@ const HeroSection = () => {
         console.error('Failed to load hero settings:', error);
       }
     };
-    
+
     loadSettings();
   }, []);
 
@@ -59,9 +57,7 @@ const HeroSection = () => {
     if (!url) return '';
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11)
-      ? match[2]
-      : url;
+    return match && match[2].length === 11 ? match[2] : url;
   };
 
   const getBackgroundStyle = () => {
@@ -69,13 +65,13 @@ const HeroSection = () => {
       case 'color':
         return { background: settings.backgroundValue } as const;
       case 'image':
-        return { 
+        return {
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${settings.backgroundValue})`,
           backgroundSize: 'cover' as const,
           backgroundPosition: 'center' as const
         };
       case 'video':
-        return { 
+        return {
           position: 'relative' as const,
           overflow: 'hidden' as const,
           backgroundColor: '#000'
@@ -89,16 +85,19 @@ const HeroSection = () => {
     <div className="relative min-h-screen flex items-center justify-center text-white" style={getBackgroundStyle()}>
       {settings.backgroundType === 'video' && (
         <div className="absolute inset-0 pointer-events-none">
-          <iframe
-            className="absolute top-0 left-0 w-screen h-screen object-cover pointer-events-none"
-            src={`https://www.youtube.com/embed/${getYoutubeId(settings.backgroundValue)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${getYoutubeId(settings.backgroundValue)}`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+          <div className="absolute top-0 left-0 w-screen h-screen overflow-hidden z-0">
+            <iframe
+              className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] transform -translate-x-1/2 -translate-y-1/2 scale-[3] md:scale-[2]"
+              src={`https://www.youtube.com/embed/${getYoutubeId(settings.backgroundValue)}?autoplay=1&mute=1&controls=0&loop=1&playlist=${getYoutubeId(settings.backgroundValue)}&modestbranding=1`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
         </div>
       )}
-      <div className="container mx-auto px-4 relative z-10">
+
+      <div className="container mx-auto px-4 relative z-20">
         <div className="max-w-2xl mx-auto text-center bg-black bg-opacity-60 backdrop-blur-sm p-8 rounded-lg shadow-lg">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
             Premium LED Light Housings
@@ -108,15 +107,15 @@ const HeroSection = () => {
             for industrial and commercial applications.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button 
+            <Button
               onClick={() => navigate('/products')}
               className="bg-secondary text-primary hover:bg-secondary/90"
               size="lg"
             >
               Explore Products
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="bg-secondary border-secondary text-primary hover:bg-secondary/90"
               size="lg"
               onClick={handleContactSales}
