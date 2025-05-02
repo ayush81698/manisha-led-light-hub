@@ -234,7 +234,7 @@ export async function addProduct(product: Product): Promise<Product | null> {
     // Handle product images - they should already be uploaded to storage at this point,
     // we just need to save their URLs to the database
     if (product.images && product.images.length > 0) {
-      const imageInserts = product.images.map((imageUrl, index) => ({
+      const imageInserts = product.images.map((imageUrl: string, index: number) => ({
         product_id: productData.id,
         image_url: imageUrl,
         display_order: index
