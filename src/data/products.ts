@@ -290,7 +290,7 @@ export async function updateProduct(product: Product): Promise<Product | null> {
       // First, delete existing images
       await supabase.from('product_images').delete().eq('product_id', product.id);
 
-      // Then insert new images
+      // Then insert new images - add proper type annotations here
       const imageInserts = product.images.map((imageUrl: string, index: number) => ({
         product_id: product.id,
         image_url: imageUrl,
