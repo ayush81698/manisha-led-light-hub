@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProductSpecifications {
@@ -142,27 +143,46 @@ function mapShapeValue(shape: string): 'Round' | 'Square' | 'Rectangular' | 'Cus
 // Function to ensure storage bucket exists
 export async function ensureStorageBucketExists() {
   try {
+    // First check if the storage extension is enabled
+    const { data: extensionData, error: extensionError } = await supabase.rpc('get_available_extensions');
+    
+    if (extensionError) {
+      console.error('Error checking extensions:', extensionError);
+    }
+    
     // Check if the bucket exists
     const { data, error } = await supabase.storage.getBucket('products');
     
-    if (error && error.message.includes('not found')) {
-      // Create the bucket if it doesn't exist
-      const { error: createError } = await supabase.storage.createBucket('products', {
-        public: true, // Make it public so we can access images without authentication
-        fileSizeLimit: 10485760, // 10MB limit
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
-      });
-      
-      if (createError) {
-        console.error('Error creating storage bucket:', createError);
+    if (error) {
+      if (error.message.includes('not found')) {
+        // Create the bucket if it doesn't exist
+        const { error: createError } = await supabase.storage.createBucket('products', {
+          public: true, // Make it public so we can access images without authentication
+          fileSizeLimit: 10485760, // 10MB limit
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+        });
+        
+        if (createError) {
+          console.error('Error creating storage bucket:', createError);
+          return false;
+        }
+        
+        // Set up public access for the bucket
+        const { error: policyError } = await supabase
+          .storage
+          .from('products')
+          .createSignedUrl('test-policy.txt', 60);
+          
+        if (policyError && !policyError.message.includes('does not exist')) {
+          console.error('Error creating signed URL for bucket:', policyError);
+        }
+        
+        console.log('Storage bucket "products" created successfully');
+        return true;
+      } else {
+        console.error('Error checking storage bucket:', error);
         return false;
       }
-      
-      console.log('Storage bucket "products" created successfully');
-      return true;
-    } else if (error) {
-      console.error('Error checking storage bucket:', error);
-      return false;
     }
     
     console.log('Storage bucket "products" already exists');

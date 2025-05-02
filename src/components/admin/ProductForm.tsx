@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,14 +94,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       try {
         setUploading(true);
         
+        // Create storage bucket if it doesn't exist
+        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('products');
+        
+        if (bucketError && bucketError.message.includes('not found')) {
+          // Create the bucket if it doesn't exist
+          const { error: createError } = await supabase.storage.createBucket('products', {
+            public: true, // Make it public so we can access images without authentication
+            fileSizeLimit: 10485760, // 10MB limit
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+          });
+          
+          if (createError) {
+            throw new Error(`Failed to create storage bucket: ${createError.message}`);
+          }
+        } else if (bucketError) {
+          throw new Error(`Error checking bucket: ${bucketError.message}`);
+        }
+        
         // Upload image to Supabase Storage
-        const filePath = `product_images/${Date.now()}_${newFile.name}`;
+        const filePath = `product_images/${Date.now()}_${newFile.name.replace(/\s+/g, '_')}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('products')
           .upload(filePath, newFile);
         
         if (uploadError) {
-          throw uploadError;
+          throw new Error(`Upload failed: ${uploadError.message}`);
         }
         
         // Get public URL for the uploaded image
@@ -129,7 +146,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
         console.error('Error uploading image:', error);
         toast({
           title: "Upload failed",
-          description: "There was a problem uploading the image. Please try again.",
+          description: `There was a problem uploading the image: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: "destructive"
         });
       } finally {
@@ -146,14 +163,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       try {
         setUploading(true);
         
+        // Create storage bucket if it doesn't exist
+        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('products');
+        
+        if (bucketError && bucketError.message.includes('not found')) {
+          // Create the bucket if it doesn't exist
+          const { error: createError } = await supabase.storage.createBucket('products', {
+            public: true, // Make it public so we can access 3D models without authentication
+            fileSizeLimit: 10485760, // 10MB limit
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+          });
+          
+          if (createError) {
+            throw new Error(`Failed to create storage bucket: ${createError.message}`);
+          }
+        } else if (bucketError) {
+          throw new Error(`Error checking bucket: ${bucketError.message}`);
+        }
+        
         // Upload model to Supabase Storage
-        const filePath = `models/${Date.now()}_${file.name}`;
+        const filePath = `models/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('products')
           .upload(filePath, file);
         
         if (uploadError) {
-          throw uploadError;
+          throw new Error(`Upload failed: ${uploadError.message}`);
         }
         
         // Get public URL for the uploaded model
@@ -180,7 +215,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
         console.error('Error uploading 3D model:', error);
         toast({
           title: "Upload failed",
-          description: "There was a problem uploading the 3D model. Please try again.",
+          description: `There was a problem uploading the 3D model: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: "destructive"
         });
       } finally {
@@ -279,6 +314,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
   React.useEffect(() => {
     const createBucketIfNotExists = async () => {
       try {
+        // Check if the bucket exists
         const { data, error } = await supabase.storage.getBucket('products');
         
         if (error && error.message.includes('not found')) {
@@ -291,9 +327,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
           
           if (createError) {
             console.error('Error creating storage bucket:', createError);
+            toast({
+              title: "Storage Setup Failed",
+              description: "Could not create storage for product images. Please contact support.",
+              variant: "destructive"
+            });
+          } else {
+            console.log('Storage bucket created successfully');
           }
         } else if (error) {
           console.error('Error checking storage bucket:', error);
+          toast({
+            title: "Storage Check Failed",
+            description: "Could not verify product image storage. Please contact support.",
+            variant: "destructive"
+          });
+        } else {
+          console.log('Storage bucket exists');
         }
       } catch (error) {
         console.error('Error setting up storage:', error);

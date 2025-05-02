@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,7 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const shareUrl = `${window.location.origin}/products/${product.id}`;
     
     try {
-      // Only attempt to use Web Share API if in a secure context
+      // Only attempt to use Web Share API if in a secure context and API is available
       if (navigator.share && window.isSecureContext) {
         await navigator.share({
           title: product.name,
@@ -101,16 +100,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     } catch (error) {
       console.error('Error sharing product:', error);
       
-      // Simplified error handling that doesn't expose technical details to users
-      toast({
-        title: "Sharing failed",
-        description: "We couldn't share this product. The link has been copied to your clipboard instead.",
-        variant: "destructive"
-      });
-      
-      // Try to copy to clipboard as a fallback
+      // Simplified positive message even when sharing fails
       try {
         await navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now paste the product link anywhere you want to share it.",
+        });
       } catch (clipboardError) {
         console.error('Clipboard fallback failed:', clipboardError);
       }
