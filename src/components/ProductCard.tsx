@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Product, saveInquiry } from "@/data/products";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
 interface ProductCardProps {
@@ -70,6 +70,41 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === 0 ? product.images!.length - 1 : prevIndex - 1
       );
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/products/${product.id}`;
+    
+    try {
+      // Use Web Share API if available (primarily mobile devices)
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.description,
+          url: shareUrl,
+        });
+        
+        toast({
+          title: "Shared successfully",
+          description: "The product has been shared using your device's share functionality.",
+        });
+      } else {
+        // Fallback to clipboard for desktop browsers
+        await navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now paste the product link anywhere you want to share it.",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing product:', error);
+      toast({
+        title: "Sharing failed",
+        description: "There was a problem sharing this product.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -147,12 +182,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             )}
           </div>
-          <Button 
-            className="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-white"
-            onClick={() => navigate(`/products/${product.id}`)}
-          >
-            View Details
-          </Button>
+          <div className="flex gap-2 mt-3">
+            <Button 
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+              onClick={() => navigate(`/products/${product.id}`)}
+            >
+              View Details
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleShare}
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-50"
+              title="Share this product"
+            >
+              <Share2 size={18} />
+            </Button>
+          </div>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-3 mt-4">

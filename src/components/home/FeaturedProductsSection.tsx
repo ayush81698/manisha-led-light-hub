@@ -14,10 +14,12 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
     backgroundType: 'color',
     backgroundValue: '#f9fafb'
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        setLoading(true);
         // Try to get settings from Supabase
         const { data, error } = await supabase
           .from('settings')
@@ -53,6 +55,8 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
         }
       } catch (error) {
         console.error('Failed to load featured settings:', error);
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -93,6 +97,16 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
         return { background: '#f9fafb' } as const;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <div className="container mx-auto px-4">
+          <p className="text-gray-500">Loading featured products...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="py-16 relative dark:bg-gray-900" style={getBackgroundStyle()}>

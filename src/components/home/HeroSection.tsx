@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +11,12 @@ const HeroSection = () => {
     backgroundType: 'color',
     backgroundValue: '#0047AB'
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('settings')
           .select('*')
@@ -43,6 +46,8 @@ const HeroSection = () => {
         }
       } catch (error) {
         console.error('Failed to load hero settings:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -80,6 +85,14 @@ const HeroSection = () => {
         return {} as const;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center text-white" style={getBackgroundStyle()}>

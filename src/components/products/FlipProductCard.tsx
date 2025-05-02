@@ -3,12 +3,49 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/data/products';
+import { Share2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface FlipProductCardProps {
   product: Product;
 }
 
 const FlipProductCard: React.FC<FlipProductCardProps> = ({ product }) => {
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/products/${product.id}`;
+    
+    try {
+      // Use Web Share API if available (primarily mobile devices)
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.description,
+          url: shareUrl,
+        });
+        
+        toast({
+          title: "Shared successfully",
+          description: "The product has been shared using your device's share functionality.",
+        });
+      } else {
+        // Fallback to clipboard for desktop browsers
+        await navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now paste the product link anywhere you want to share it.",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing product:', error);
+      toast({
+        title: "Sharing failed",
+        description: "There was a problem sharing this product.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="flip-card w-full h-[280px]">
       <div className="flip-card-inner">
@@ -21,11 +58,20 @@ const FlipProductCard: React.FC<FlipProductCardProps> = ({ product }) => {
         </div>
         <div className="flip-card-back">
           <h3 className="title text-lg font-semibold mb-4">{product.name}</h3>
-          <Link to={`/products/${product.id}`}>
-            <Button className="bg-white hover:bg-gray-100 text-primary">
-              View Details
+          <div className="flex flex-col gap-2">
+            <Link to={`/products/${product.id}`}>
+              <Button className="w-full bg-white hover:bg-gray-100 text-primary">
+                View Details
+              </Button>
+            </Link>
+            <Button 
+              variant="outline"
+              className="w-full border-white text-white hover:bg-white hover:text-primary flex items-center gap-2"
+              onClick={handleShare}
+            >
+              <Share2 size={16} /> Share
             </Button>
-          </Link>
+          </div>
         </div>
       </div>
     </div>

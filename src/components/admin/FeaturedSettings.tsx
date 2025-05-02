@@ -91,49 +91,50 @@ const FeaturedSettings = () => {
         }
       }
 
-      // Always save to localStorage
-      localStorage.setItem('featuredSettings', JSON.stringify(finalSettings));
-      
-      // Only attempt to save to database if in 'both' mode
-      if (saveMode === 'both') {
-        console.log("Saving settings to Supabase:", finalSettings);
-        const { error } = await supabase
-          .from('settings')
-          .upsert({
-            name: 'featuredSettings',
-            value: finalSettings as unknown as Json
-          });
+      // Always attempt to save to database first
+      console.log("Saving settings to Supabase:", finalSettings);
+      const { error } = await supabase
+        .from('settings')
+        .upsert({
+          name: 'featuredSettings',
+          value: finalSettings as unknown as Json
+        });
 
-        if (error) {
-          console.error('Error saving settings to DB:', error);
-          setDbError(`Database save error: ${error.message}`);
-          setSaveMode('local');
-          
-          toast({
-            title: "Settings saved locally only",
-            description: "Could not save to database due to permissions. Settings saved to browser storage.",
-            variant: "destructive"
-          });
-          
-          return;
-        } else {
-          // Reset error state if save was successful
-          setDbError(null);
-          setSaveMode('both');
-        }
+      if (error) {
+        console.error('Error saving settings to DB:', error);
+        setDbError(`Database save error: ${error.message}`);
+        setSaveMode('local');
+        
+        // Save to localStorage as fallback
+        localStorage.setItem('featuredSettings', JSON.stringify(finalSettings));
+        
+        toast({
+          title: "Settings saved locally only",
+          description: "Could not save to database due to permissions. Settings saved to browser storage.",
+          variant: "destructive"
+        });
+      } else {
+        // Reset error state if save was successful
+        setDbError(null);
+        setSaveMode('both');
+        
+        // Still save to localStorage as a backup
+        localStorage.setItem('featuredSettings', JSON.stringify(finalSettings));
+        
+        toast({
+          title: "Settings saved",
+          description: "Featured section settings have been updated successfully in the database.",
+        });
       }
-      
-      toast({
-        title: "Settings saved",
-        description: saveMode === 'both' 
-          ? "Featured section settings have been updated successfully."
-          : "Settings saved to browser storage only.",
-      });
     } catch (error) {
       console.error('Failed to save featured settings:', error);
+      
+      // Save to localStorage as fallback
+      localStorage.setItem('featuredSettings', JSON.stringify(settings));
+      
       toast({
-        title: "Error saving settings",
-        description: "Please try again",
+        title: "Error saving to database",
+        description: "Settings saved to browser storage as fallback.",
         variant: "destructive"
       });
     } finally {
