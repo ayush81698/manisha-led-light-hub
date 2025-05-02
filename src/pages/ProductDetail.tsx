@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchProducts, saveInquiry, Product, ProductSpecifications } from '@/data/products';
 import { toast } from '@/components/ui/use-toast';
-import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductModelViewer } from '@/components/ProductModelViewer';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext
+} from '@/components/ui/carousel';
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -86,6 +94,45 @@ const ProductDetail = () => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === 0 ? product.images!.length - 1 : prevIndex - 1
       );
+    }
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    
+    try {
+      const shareUrl = `${window.location.origin}/products/${product.id}`;
+      
+      // Check if Web Share API is available
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.description,
+          url: shareUrl,
+        });
+        
+        toast({
+          title: "Shared successfully",
+          description: "The product has been shared using your device's share functionality.",
+        });
+      } else {
+        // Fallback to clipboard copy
+        await navigator.clipboard.writeText(shareUrl);
+        
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now paste the product link anywhere you want to share it.",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing product:', error);
+      // More specific error messages based on the error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast({
+        title: "Sharing failed",
+        description: `There was a problem sharing this product: ${errorMessage}`,
+        variant: "destructive"
+      });
     }
   };
   
@@ -212,63 +259,66 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md flex flex-col items-center justify-center relative">
-          {product.model_url && (
-            <div className="flex justify-center gap-2 mb-4">
-              <Button 
-                variant={viewMode === 'image' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => setViewMode('image')}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              >
-                View Images
-              </Button>
-              <Button 
-                variant={viewMode === '3d' ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => setViewMode('3d')}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              >
-                View 3D Model
-              </Button>
-            </div>
-          )}
+          <div className="flex justify-center gap-2 mb-4 w-full">
+            {product.model_url && (
+              <>
+                <Button 
+                  variant={viewMode === 'image' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setViewMode('image')}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  View Images
+                </Button>
+                <Button 
+                  variant={viewMode === '3d' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setViewMode('3d')}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  View 3D Model
+                </Button>
+              </>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="ml-auto text-foreground border-yellow-500 hover:bg-yellow-50 dark:hover:bg-gray-700"
+              title="Share this product"
+            >
+              <Share2 size={16} className="mr-1" /> Share
+            </Button>
+          </div>
           
           {viewMode === 'image' ? (
             <>
-              <img 
-                src={product.images && product.images.length > 0 ? product.images[currentImageIndex] : product.image_url || '/placeholder.svg'} 
-                alt={product.name} 
-                className="max-h-96 object-contain"
-              />
-
-              {product.images && product.images.length > 1 && (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute left-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
-                    onClick={prevImage}
-                  >
-                    <ChevronLeft size={16} />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute right-4 bg-white bg-opacity-50 hover:bg-opacity-70 dark:bg-gray-700 dark:bg-opacity-50 dark:hover:bg-opacity-70"
-                    onClick={nextImage}
-                  >
-                    <ChevronRight size={16} />
-                  </Button>
-                  <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1">
-                    {product.images.map((_, index) => (
-                      <div 
-                        key={index} 
-                        className={`w-2 h-2 rounded-full cursor-pointer ${currentImageIndex === index ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
-                        onClick={() => setCurrentImageIndex(index)}
-                      ></div>
+              {product.images && product.images.length > 0 ? (
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {product.images.map((image, index) => (
+                      <CarouselItem key={index} className="flex justify-center">
+                        <img 
+                          src={image} 
+                          alt={`${product.name} - Image ${index + 1}`} 
+                          className="max-h-96 object-contain"
+                        />
+                      </CarouselItem>
                     ))}
-                  </div>
-                </>
+                  </CarouselContent>
+                  {product.images.length > 1 && (
+                    <>
+                      <CarouselPrevious className="left-1" />
+                      <CarouselNext className="right-1" />
+                    </>
+                  )}
+                </Carousel>
+              ) : (
+                <img 
+                  src={product.image_url || '/placeholder.svg'} 
+                  alt={product.name} 
+                  className="max-h-96 object-contain"
+                />
               )}
             </>
           ) : (

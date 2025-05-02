@@ -100,9 +100,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       }
     } catch (error) {
       console.error('Error sharing product:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Sharing failed",
-        description: "There was a problem sharing this product.",
+        description: `There was a problem sharing this product: ${errorMessage}`,
         variant: "destructive"
       });
     }
@@ -193,7 +194,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               variant="outline"
               size="icon"
               onClick={handleShare}
-              className="border-yellow-500 text-yellow-500 hover:bg-yellow-50"
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-50 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300 dark:hover:bg-gray-800"
               title="Share this product"
             >
               <Share2 size={18} />

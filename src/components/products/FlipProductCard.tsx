@@ -12,10 +12,10 @@ interface FlipProductCardProps {
 
 const FlipProductCard: React.FC<FlipProductCardProps> = ({ product }) => {
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/products/${product.id}`;
-    
     try {
-      // Use Web Share API if available (primarily mobile devices)
+      const shareUrl = `${window.location.origin}/products/${product.id}`;
+      
+      // Check if Web Share API is available
       if (navigator.share) {
         await navigator.share({
           title: product.name,
@@ -28,7 +28,7 @@ const FlipProductCard: React.FC<FlipProductCardProps> = ({ product }) => {
           description: "The product has been shared using your device's share functionality.",
         });
       } else {
-        // Fallback to clipboard for desktop browsers
+        // Fallback to clipboard copy
         await navigator.clipboard.writeText(shareUrl);
         
         toast({
@@ -38,9 +38,11 @@ const FlipProductCard: React.FC<FlipProductCardProps> = ({ product }) => {
       }
     } catch (error) {
       console.error('Error sharing product:', error);
+      // More specific error messages based on the error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Sharing failed",
-        description: "There was a problem sharing this product.",
+        description: `There was a problem sharing this product: ${errorMessage}`,
         variant: "destructive"
       });
     }
