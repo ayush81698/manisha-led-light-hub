@@ -139,31 +139,48 @@ function mapShapeValue(shape: string): 'Round' | 'Square' | 'Rectangular' | 'Cus
   }
 }
 
+// Function to ensure storage bucket exists
+export async function ensureStorageBucketExists() {
+  try {
+    // Check if the bucket exists
+    const { data, error } = await supabase.storage.getBucket('products');
+    
+    if (error && error.message.includes('not found')) {
+      // Create the bucket if it doesn't exist
+      const { error: createError } = await supabase.storage.createBucket('products', {
+        public: true, // Make it public so we can access images without authentication
+        fileSizeLimit: 10485760, // 10MB limit
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+      });
+      
+      if (createError) {
+        console.error('Error creating storage bucket:', createError);
+        return false;
+      }
+      
+      console.log('Storage bucket "products" created successfully');
+      return true;
+    } else if (error) {
+      console.error('Error checking storage bucket:', error);
+      return false;
+    }
+    
+    console.log('Storage bucket "products" already exists');
+    return true;
+  } catch (error) {
+    console.error('Error ensuring storage bucket exists:', error);
+    return false;
+  }
+}
+
 export async function addProduct(product: Product): Promise<Product | null> {
   try {
-    // Handle 3D model file if present
+    // Ensure the storage bucket exists
+    await ensureStorageBucketExists();
+    
+    // Handle 3D model file if present - but this is now handled directly in the form
     let modelUrl = product.model_url;
-    if (modelUrl && modelUrl.startsWith('blob:')) {
-      const modelResponse = await fetch(modelUrl);
-      const modelBlob = await modelResponse.blob();
-      const modelFileName = `models/${Date.now()}.glb`;
-      
-      const { data: modelData, error: modelError } = await supabase.storage
-        .from('product-models')
-        .upload(modelFileName, modelBlob, {
-          contentType: 'model/gltf-binary'
-        });
-
-      if (modelError) throw modelError;
-
-      // Get the public URL for the uploaded model
-      const { data: publicUrlData } = supabase.storage
-        .from('product-models')
-        .getPublicUrl(modelFileName);
-
-      modelUrl = publicUrlData.publicUrl;
-    }
-
+    
     // First, insert specifications
     const { data: specData, error: specError } = await supabase
       .from('product_specifications')
@@ -173,7 +190,7 @@ export async function addProduct(product: Product): Promise<Product | null> {
 
     if (specError) throw specError;
 
-    // Then, insert product with specifications ID and permanent model URL
+    // Then, insert product with specifications ID
     const { data: productData, error: productError } = await supabase
       .from('products')
       .insert({
@@ -194,7 +211,8 @@ export async function addProduct(product: Product): Promise<Product | null> {
 
     if (productError) throw productError;
 
-    // Handle product images
+    // Handle product images - they should already be uploaded to storage at this point,
+    // we just need to save their URLs to the database
     if (product.images && product.images.length > 0) {
       const imageInserts = product.images.map((imageUrl, index) => ({
         product_id: productData.id,

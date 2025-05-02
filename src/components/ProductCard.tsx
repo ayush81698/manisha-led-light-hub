@@ -77,8 +77,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const shareUrl = `${window.location.origin}/products/${product.id}`;
     
     try {
-      // Use Web Share API if available (primarily mobile devices)
-      if (navigator.share) {
+      // Only attempt to use Web Share API if in a secure context
+      if (navigator.share && window.isSecureContext) {
         await navigator.share({
           title: product.name,
           text: product.description,
@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           description: "The product has been shared using your device's share functionality.",
         });
       } else {
-        // Fallback to clipboard for desktop browsers
+        // Always fallback to clipboard copy
         await navigator.clipboard.writeText(shareUrl);
         
         toast({
@@ -100,12 +100,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       }
     } catch (error) {
       console.error('Error sharing product:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Simplified error handling that doesn't expose technical details to users
       toast({
         title: "Sharing failed",
-        description: `There was a problem sharing this product: ${errorMessage}`,
+        description: "We couldn't share this product. The link has been copied to your clipboard instead.",
         variant: "destructive"
       });
+      
+      // Try to copy to clipboard as a fallback
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+      } catch (clipboardError) {
+        console.error('Clipboard fallback failed:', clipboardError);
+      }
     }
   };
   

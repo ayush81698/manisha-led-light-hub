@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
 import { Product, ProductSpecifications } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProductFormProps {
   product?: Product;
@@ -24,7 +26,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
       shape: 'Round',
       material: 'Aluminum',
       color: 'Silver',
-      images: ['/placeholder.svg'],
+      images: [],
       is_active: true,
       model_url: '',
       specifications: {
@@ -47,6 +49,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [modelFile, setModelFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -84,59 +87,174 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const newFile = e.target.files[0];
       setImageFiles([...imageFiles, newFile]);
       
-      // In a real app, you would upload the file to storage here
-      // For now, we'll create a local URL for preview
-      const fileUrl = URL.createObjectURL(newFile);
-      setFormData({
-        ...formData,
-        images: [...(formData.images || []), fileUrl],
-      });
+      try {
+        setUploading(true);
+        
+        // Upload image to Supabase Storage
+        const filePath = `product_images/${Date.now()}_${newFile.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('products')
+          .upload(filePath, newFile);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        // Get public URL for the uploaded image
+        const { data: publicUrlData } = supabase.storage
+          .from('products')
+          .getPublicUrl(filePath);
+          
+        if (!publicUrlData || !publicUrlData.publicUrl) {
+          throw new Error('Failed to get public URL for uploaded image');
+        }
+        
+        // Add the image URL to the form data
+        const imageUrl = publicUrlData.publicUrl;
+        setFormData({
+          ...formData,
+          images: [...(formData.images || []), imageUrl],
+        });
+        
+        toast({
+          title: "Image uploaded successfully",
+          description: "The image has been uploaded to the database.",
+        });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast({
+          title: "Upload failed",
+          description: "There was a problem uploading the image. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
-  const handleModelFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleModelFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setModelFile(file);
       
-      // In a real app, you would upload the model file to storage here
-      // For now, we'll create a local URL
-      const fileUrl = URL.createObjectURL(file);
-      setFormData({
-        ...formData,
-        model_url: fileUrl,
-      });
+      try {
+        setUploading(true);
+        
+        // Upload model to Supabase Storage
+        const filePath = `models/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('products')
+          .upload(filePath, file);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        // Get public URL for the uploaded model
+        const { data: publicUrlData } = supabase.storage
+          .from('products')
+          .getPublicUrl(filePath);
+          
+        if (!publicUrlData || !publicUrlData.publicUrl) {
+          throw new Error('Failed to get public URL for uploaded model');
+        }
+        
+        // Add the model URL to the form data
+        const modelUrl = publicUrlData.publicUrl;
+        setFormData({
+          ...formData,
+          model_url: modelUrl,
+        });
+        
+        toast({
+          title: "3D Model uploaded successfully",
+          description: "The 3D model has been uploaded to the database.",
+        });
+      } catch (error) {
+        console.error('Error uploading 3D model:', error);
+        toast({
+          title: "Upload failed",
+          description: "There was a problem uploading the 3D model. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const handleAddImageUrl = async () => {
+    if (imageUrl && imageUrl.trim()) {
+      try {
+        setUploading(true);
+        
+        // Validate that the URL points to an image
+        const response = await fetch(imageUrl.trim());
+        if (!response.ok || !response.headers.get('content-type')?.includes('image')) {
+          throw new Error('The provided URL does not point to a valid image');
+        }
+        
+        setFormData({
+          ...formData,
+          images: [...(formData.images || []), imageUrl.trim()],
+        });
+        
+        setImageUrl('');
+        toast({
+          title: "Image URL added",
+          description: "The external image URL has been added to the product.",
+        });
+      } catch (error) {
+        console.error('Error adding image URL:', error);
+        toast({
+          title: "Failed to add image URL",
+          description: "Please make sure the URL points to a valid image and is accessible.",
+          variant: "destructive"
+        });
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
   const handleRemoveImage = (index: number) => {
     const updatedImages = [...(formData.images || [])];
+    const removedImageUrl = updatedImages[index];
     updatedImages.splice(index, 1);
     setFormData({
       ...formData,
-      images: updatedImages.length > 0 ? updatedImages : ['/placeholder.svg'],
+      images: updatedImages.length > 0 ? updatedImages : [],
     });
+
+    // If the image is stored in Supabase Storage, remove it
+    if (removedImageUrl && removedImageUrl.includes('supabase')) {
+      try {
+        // Extract the file path from the URL
+        const path = removedImageUrl.split('/').slice(-2).join('/');
+        supabase.storage
+          .from('products')
+          .remove([path])
+          .then(({ error }) => {
+            if (error) {
+              console.error('Error removing image from storage:', error);
+            }
+          });
+      } catch (error) {
+        console.error('Error parsing path for image removal:', error);
+      }
+    }
 
     // Also remove from imageFiles if present
     if (index < imageFiles.length) {
       const updatedFiles = [...imageFiles];
       updatedFiles.splice(index, 1);
       setImageFiles(updatedFiles);
-    }
-  };
-
-  const handleAddImageUrl = () => {
-    if (imageUrl && imageUrl.trim()) {
-      setFormData({
-        ...formData,
-        images: [...(formData.images || []), imageUrl.trim()],
-      });
-      setImageUrl('');
     }
   };
 
@@ -156,6 +274,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
     // Submit the form data
     onSubmit(formData);
   };
+
+  // Create storage bucket if it doesn't exist
+  React.useEffect(() => {
+    const createBucketIfNotExists = async () => {
+      try {
+        const { data, error } = await supabase.storage.getBucket('products');
+        
+        if (error && error.message.includes('not found')) {
+          // Bucket doesn't exist, create it
+          const { error: createError } = await supabase.storage.createBucket('products', {
+            public: true,
+            fileSizeLimit: 10485760, // 10MB
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+          });
+          
+          if (createError) {
+            console.error('Error creating storage bucket:', createError);
+          }
+        } else if (error) {
+          console.error('Error checking storage bucket:', error);
+        }
+      } catch (error) {
+        console.error('Error setting up storage:', error);
+      }
+    };
+    
+    createBucketIfNotExists();
+  }, []);
 
   return (
     <Card className="w-full dark:bg-gray-800">
@@ -299,8 +445,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
+                  disabled={uploading}
                   className="dark:bg-gray-700 dark:text-white"
                 />
+                {uploading && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploading...</p>}
               </div>
               
               <div>
@@ -311,11 +459,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
+                    disabled={uploading}
                     className="dark:bg-gray-700 dark:text-white"
                   />
                   <Button 
                     type="button" 
                     onClick={handleAddImageUrl}
+                    disabled={uploading}
                     className="flex-shrink-0 bg-yellow-500 hover:bg-yellow-600 text-white"
                   >
                     Add
@@ -336,8 +486,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
                   type="file"
                   accept=".glb"
                   onChange={handleModelFileChange}
+                  disabled={uploading}
                   className="dark:bg-gray-700 dark:text-white"
                 />
+                {uploading && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploading...</p>}
               </div>
               
               <div>
