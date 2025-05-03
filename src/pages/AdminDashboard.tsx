@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import ProductForm from '@/components/admin/ProductForm';
 import HeroSettings from '@/components/admin/HeroSettings';
 import FeaturedSettings from '@/components/admin/FeaturedSettings';
+import { clearAdminSession } from '@/data/adminAuth';
 
 const AdminDashboard = () => {
   const [productsList, setProductsList] = useState<Product[]>([]);
@@ -18,6 +18,7 @@ const AdminDashboard = () => {
   const [isNewProductOpen, setIsNewProductOpen] = useState(false);
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     loadProducts();
@@ -32,6 +33,15 @@ const AdminDashboard = () => {
   const loadInquiries = async () => {
     const inquiries = await fetchInquiries();
     setInquiriesList(inquiries);
+  };
+  
+  const handleLogout = () => {
+    clearAdminSession();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
+    navigate('/admin');
   };
   
   const handleStatusChange = async (inquiryId: string, newStatus: string) => {
@@ -169,11 +179,9 @@ const AdminDashboard = () => {
                 View Site
               </Button>
             </Link>
-            <Link to="/admin">
-              <Button variant="outline" size="sm" className="dark:text-white">
-                Sign Out
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="dark:text-white" onClick={handleLogout}>
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>

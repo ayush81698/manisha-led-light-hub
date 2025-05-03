@@ -1,19 +1,28 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { loginAdmin, saveAdminSession, isAdminLoggedIn } from '@/data/adminAuth';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // If admin is already logged in, redirect to dashboard
+    if (isAdminLoggedIn()) {
+      navigate('/admin/dashboard');
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -27,13 +36,19 @@ const AdminLogin = () => {
     
     setIsLoading(true);
     
-    // Demo credentials: admin@example.com / password123
-    setTimeout(() => {
-      if (email === 'admin@example.com' && password === 'password123') {
+    try {
+      const admin = await loginAdmin(email, password);
+      
+      if (admin) {
+        if (rememberMe) {
+          saveAdminSession(admin);
+        }
+        
         toast({
           title: "Success",
           description: "Logged in successfully",
         });
+        
         navigate('/admin/dashboard');
       } else {
         toast({
@@ -41,9 +56,17 @@ const AdminLogin = () => {
           description: "Invalid credentials",
           variant: "destructive",
         });
-        setIsLoading(false);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred during login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,7 +84,7 @@ const AdminLogin = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -84,7 +107,11 @@ const AdminLogin = () => {
             </div>
             
             <div className="flex items-center">
-              <Checkbox id="remember" />
+              <Checkbox 
+                id="remember" 
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+              />
               <Label htmlFor="remember" className="ml-2 text-sm font-normal">
                 Remember me for 30 days
               </Label>
@@ -98,10 +125,6 @@ const AdminLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>For demo, use: admin@example.com / password123</p>
-          </div>
         </div>
       </div>
     </div>
