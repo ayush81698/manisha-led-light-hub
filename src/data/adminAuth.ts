@@ -8,7 +8,9 @@ export interface AdminUser {
 
 export async function loginAdmin(email: string, password: string): Promise<AdminUser | null> {
   try {
-    // First check if the admin user exists with the provided credentials
+    console.log("Attempting login with:", email);
+    
+    // Query the admin_users table for the provided email and password
     const { data, error } = await supabase
       .from('admin_users')
       .select('id, email')
@@ -21,10 +23,13 @@ export async function loginAdmin(email: string, password: string): Promise<Admin
       return null;
     }
     
+    // If no match found, return null
     if (!data) {
+      console.log("No matching admin user found");
       return null;
     }
     
+    console.log("Admin login successful:", data.email);
     return data as AdminUser;
   } catch (error) {
     console.error('Exception during admin login:', error);

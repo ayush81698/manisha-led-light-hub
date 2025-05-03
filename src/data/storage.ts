@@ -1,49 +1,76 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
-// Function to ensure storage bucket exists
-export async function ensureStorageBucketExists() {
+export async function createBucket(bucketName: string) {
   try {
-    // First check if the storage extension is enabled
-    const { data: extensionData, error: extensionError } = await supabase.rpc('get_available_extensions');
+    // Define the allowedMimeTypes with an explicit type
+    const allowedMimeTypes: string[] = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
     
-    if (extensionError) {
-      console.error('Error checking extensions:', extensionError);
-    }
-    
-    // Check if the bucket exists
-    const { data, error } = await supabase.storage.getBucket('products');
+    const { error } = await supabase.storage.createBucket(bucketName, {
+      public: true,
+      allowedMimeTypes: allowedMimeTypes,
+      fileSizeLimit: 1024 * 1024 * 2 // 2MB
+    });
     
     if (error) {
-      if (error.message.includes('not found')) {
-        console.log('Bucket not found, attempting to create...');
-        // Create the bucket if it doesn't exist
-        // Define the allowed mime types with the correct type
-        const allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary'];
-        
-        const { error: createError } = await supabase.storage.createBucket('products', {
-          public: true, // Make it public so we can access images without authentication
-          fileSizeLimit: 10485760, // 10MB limit
-          allowedMimeTypes: allowedTypes
-        });
-        
-        if (createError) {
-          console.error('Error creating storage bucket:', createError);
-          return false;
-        }
-        
-        console.log('Storage bucket "products" created successfully');
-        return true;
-      } else {
-        console.error('Error checking storage bucket:', error);
-        return false;
-      }
+      console.error('Error creating bucket:', error.message);
+      return false;
     }
     
-    console.log('Storage bucket "products" already exists');
     return true;
   } catch (error) {
-    console.error('Error ensuring storage bucket exists:', error);
+    console.error('Exception creating bucket:', error);
+    return false;
+  }
+}
+
+export async function uploadFile(bucketName: string, filePath: string, file: File) {
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
+    if (error) {
+      console.error('Error uploading file:', error.message);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Exception uploading file:', error);
+    return null;
+  }
+}
+
+export async function getFileUrl(bucketName: string, filePath: string): Promise<string | null> {
+  try {
+    const { data } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(filePath);
+    
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error getting public URL:', error);
+    return null;
+  }
+}
+
+export async function deleteFile(bucketName: string, filePath: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove([filePath]);
+    
+    if (error) {
+      console.error('Error deleting file:', error.message);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Exception deleting file:', error);
     return false;
   }
 }
