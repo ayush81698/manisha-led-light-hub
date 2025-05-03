@@ -154,6 +154,7 @@ export async function ensureStorageBucketExists() {
     
     if (error) {
       if (error.message.includes('not found')) {
+        console.log('Bucket not found, attempting to create...');
         // Create the bucket if it doesn't exist
         const { error: createError } = await supabase.storage.createBucket('products', {
           public: true, // Make it public so we can access images without authentication
@@ -164,16 +165,6 @@ export async function ensureStorageBucketExists() {
         if (createError) {
           console.error('Error creating storage bucket:', createError);
           return false;
-        }
-        
-        // Set up public access for the bucket
-        const { error: policyError } = await supabase
-          .storage
-          .from('products')
-          .createSignedUrl('test-policy.txt', 60);
-          
-        if (policyError && !policyError.message.includes('does not exist')) {
-          console.error('Error creating signed URL for bucket:', policyError);
         }
         
         console.log('Storage bucket "products" created successfully');
@@ -290,8 +281,8 @@ export async function updateProduct(product: Product): Promise<Product | null> {
       // First, delete existing images
       await supabase.from('product_images').delete().eq('product_id', product.id);
 
-      // Then insert new images - add proper type annotations here
-      const imageInserts = product.images.map((imageUrl: string, index: number) => ({
+      // Then insert new images with explicit typing
+      const imageInserts = (product.images as string[]).map((imageUrl: string, index: number) => ({
         product_id: product.id,
         image_url: imageUrl,
         display_order: index
