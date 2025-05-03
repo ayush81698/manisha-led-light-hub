@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProductSpecifications {
@@ -282,7 +283,7 @@ export async function updateProduct(product: Product): Promise<Product | null> {
       await supabase.from('product_images').delete().eq('product_id', product.id);
 
       // Then insert new images
-      const imageInserts = (product.images as string[]).map((imageUrl: string, index: number) => ({
+      const imageInserts = product.images.map((imageUrl, index) => ({
         product_id: product.id,
         image_url: imageUrl,
         display_order: index
