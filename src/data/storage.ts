@@ -18,10 +18,11 @@ export async function ensureStorageBucketExists() {
       if (error.message.includes('not found')) {
         console.log('Bucket not found, attempting to create...');
         // Create the bucket if it doesn't exist
+        // Using explicit type annotation to fix the TypeScript error
         const { error: createError } = await supabase.storage.createBucket('products', {
           public: true, // Make it public so we can access images without authentication
           fileSizeLimit: 10485760, // 10MB limit
-          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary']
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'model/gltf-binary'] as string[]
         });
         
         if (createError) {
