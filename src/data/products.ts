@@ -224,7 +224,7 @@ export async function addProduct(product: Product): Promise<Product | null> {
     // Handle product images - they should already be uploaded to storage at this point,
     // we just need to save their URLs to the database
     if (product.images && product.images.length > 0) {
-      const imageInserts = (product.images as string[]).map((imageUrl: string, index: number) => ({
+      const imageInserts = product.images.map((imageUrl, index) => ({
         product_id: productData.id,
         image_url: imageUrl,
         display_order: index
@@ -281,7 +281,7 @@ export async function updateProduct(product: Product): Promise<Product | null> {
       // First, delete existing images
       await supabase.from('product_images').delete().eq('product_id', product.id);
 
-      // Then insert new images with explicit typing
+      // Then insert new images
       const imageInserts = (product.images as string[]).map((imageUrl: string, index: number) => ({
         product_id: product.id,
         image_url: imageUrl,
