@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export async function createBucket(bucketName: string) {
@@ -71,6 +72,27 @@ export async function deleteFile(bucketName: string, filePath: string): Promise<
     return true;
   } catch (error) {
     console.error('Exception deleting file:', error);
+    return false;
+  }
+}
+
+// Add the missing function that's causing the build error
+export async function ensureStorageBucketExists(bucketName: string = 'products'): Promise<boolean> {
+  try {
+    // Check if bucket exists
+    const { data, error } = await supabase.storage.getBucket(bucketName);
+    
+    if (error && error.message.includes('not found')) {
+      // Create the bucket if it doesn't exist
+      return await createBucket(bucketName);
+    } else if (error) {
+      console.error('Error checking bucket:', error.message);
+      return false;
+    }
+    
+    return true; // Bucket already exists
+  } catch (error) {
+    console.error('Exception checking/creating bucket:', error);
     return false;
   }
 }
