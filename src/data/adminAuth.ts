@@ -6,6 +6,49 @@ export interface AdminUser {
   email: string;
 }
 
+// Create a default admin user if it doesn't exist
+export async function ensureDefaultAdminExists(): Promise<boolean> {
+  try {
+    // Check if admin user exists
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('email', 'admin@example.com')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking for admin user:', error);
+      return false;
+    }
+
+    // If admin doesn't exist, create one
+    if (!data) {
+      console.log('Creating default admin user...');
+      const { error: insertError } = await supabase
+        .from('admin_users')
+        .insert([
+          {
+            email: 'admin@example.com',
+            password: 'admin123',
+          }
+        ]);
+
+      if (insertError) {
+        console.error('Error creating default admin:', insertError);
+        return false;
+      }
+
+      console.log('Default admin user created successfully');
+      return true;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Exception during admin creation:', error);
+    return false;
+  }
+}
+
 export async function loginAdmin(email: string, password: string): Promise<AdminUser | null> {
   try {
     console.log("Attempting login with:", email);
@@ -15,9 +58,9 @@ export async function loginAdmin(email: string, password: string): Promise<Admin
       .from('admin_users')
       .select('id, email, password')
       .eq('email', email)
-      .single();
+      .maybeSingle(); // Using maybeSingle instead of single to handle no rows case
     
-    if (adminError) {
+    if (adminError && adminError.code !== 'PGRST116') { // Ignore "no rows returned" error
       console.error('Error during admin login query:', adminError);
       return null;
     }

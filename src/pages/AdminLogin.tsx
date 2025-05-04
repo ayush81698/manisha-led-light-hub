@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { loginAdmin, saveAdminSession, isAdminLoggedIn } from '@/data/adminAuth';
+import { loginAdmin, saveAdminSession, isAdminLoggedIn, ensureDefaultAdminExists } from '@/data/adminAuth';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -20,6 +20,20 @@ const AdminLogin = () => {
     if (isAdminLoggedIn()) {
       navigate('/admin/dashboard');
     }
+    
+    // Ensure default admin user exists
+    ensureDefaultAdminExists().then(success => {
+      if (success) {
+        setEmail('admin@example.com');
+        setPassword('admin123');
+        
+        // Show default credentials message
+        toast({
+          title: "Default Credentials",
+          description: "Use admin@example.com / admin123 to login",
+        });
+      }
+    });
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
