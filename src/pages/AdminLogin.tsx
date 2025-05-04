@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,17 +20,10 @@ const AdminLogin = () => {
       navigate('/admin/dashboard');
     }
     
-    // Ensure default admin user exists
+    // Ensure default admin user exists but don't show toast
     ensureDefaultAdminExists().then(success => {
       if (success) {
         setEmail('admin@example.com');
-        setPassword('admin123');
-        
-        // Show default credentials message
-        toast({
-          title: "Default Credentials",
-          description: "Use admin@example.com / admin123 to login",
-        });
       }
     });
   }, [navigate]);

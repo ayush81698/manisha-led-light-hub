@@ -29,7 +29,7 @@ export async function ensureDefaultAdminExists(): Promise<boolean> {
         .insert([
           {
             email: 'admin@example.com',
-            password: 'admin123',
+            password: 'manishaent123456',
           }
         ]);
 
