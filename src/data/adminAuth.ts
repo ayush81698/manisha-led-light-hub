@@ -10,27 +10,35 @@ export async function loginAdmin(email: string, password: string): Promise<Admin
   try {
     console.log("Attempting login with:", email);
     
-    // Query the admin_users table for the provided email and password
-    const { data, error } = await supabase
+    // Query the admin_users table for the provided email
+    const { data: adminData, error: adminError } = await supabase
       .from('admin_users')
-      .select('id, email')
+      .select('id, email, password')
       .eq('email', email)
-      .eq('password', password)
       .single();
     
-    if (error) {
-      console.error('Error during admin login:', error);
+    if (adminError) {
+      console.error('Error during admin login query:', adminError);
       return null;
     }
     
-    // If no match found, return null
-    if (!data) {
+    // If no matching admin user found, return null
+    if (!adminData) {
       console.log("No matching admin user found");
       return null;
     }
     
-    console.log("Admin login successful:", data.email);
-    return data as AdminUser;
+    // Check if password matches (simple string comparison for now)
+    if (adminData.password !== password) {
+      console.log("Password doesn't match");
+      return null;
+    }
+    
+    console.log("Admin login successful:", adminData.email);
+    
+    // Return admin user without the password
+    const { password: _, ...adminUser } = adminData;
+    return adminUser as AdminUser;
   } catch (error) {
     console.error('Exception during admin login:', error);
     return null;

@@ -37,12 +37,12 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
+      console.log("Logging in with:", email, "Password length:", password.length);
       const admin = await loginAdmin(email, password);
       
       if (admin) {
-        if (rememberMe) {
-          saveAdminSession(admin);
-        }
+        console.log("Login successful, saving session");
+        saveAdminSession(admin);
         
         toast({
           title: "Success",
@@ -51,6 +51,7 @@ const AdminLogin = () => {
         
         navigate('/admin/dashboard');
       } else {
+        console.log("Login failed - invalid credentials");
         toast({
           title: "Error",
           description: "Invalid credentials",
