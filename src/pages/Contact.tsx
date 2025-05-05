@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
-import { saveInquiry } from '@/data/products';
+import { saveInquiry } from '@/data/inquiryService';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -39,14 +39,10 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Save the general inquiry with a placeholder product ID
-      // We use a fixed product ID for general inquiries from the contact form
-      const generalInquiryProductId = '00000000-0000-0000-0000-000000000000';
-      const quantity = 1; // Default quantity for general inquiries
-      
+      // Use null for product_id to indicate a general inquiry
       const result = await saveInquiry(
-        generalInquiryProductId,
-        quantity,
+        null, // Pass null instead of a placeholder UUID
+        1, // Default quantity for general inquiries
         formData.phone,
         `Name: ${formData.name}, Email: ${formData.email}, Message: ${formData.message}`
       );
