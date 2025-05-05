@@ -95,7 +95,7 @@ const HeroSection = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center text-white" style={getBackgroundStyle()}>
+    <div className="relative min-h-screen flex flex-col items-center justify-between text-white" style={getBackgroundStyle()}>
       {settings.backgroundType === 'video' && (
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 w-screen h-screen overflow-hidden z-0">
@@ -106,36 +106,36 @@ const HeroSection = () => {
               allowFullScreen
             />
           </div>
-          <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
         </div>
       )}
 
-      <div className="container mx-auto px-4 relative z-20">
-        <div className="max-w-2xl mx-auto text-center bg-black bg-opacity-60 backdrop-blur-sm p-8 rounded-lg shadow-lg">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+      {/* Top Section - Title */}
+      <div className="container mx-auto px-4 relative z-20 mt-10">
+        <div className="max-w-3xl mx-auto text-center bg-black bg-opacity-60 backdrop-blur-sm p-4 rounded-lg">
+          <h1 className="text-3xl md:text-4xl font-bold text-white">
             Premium LED Light Housings
           </h1>
-          <p className="text-lg md:text-xl mb-8 text-gray-100">
-            Manisha Enterprises specializes in manufacturing high-quality LED light housings
-            for industrial and commercial applications.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button
-              onClick={() => navigate('/products')}
-              className="bg-secondary text-primary hover:bg-secondary/90"
-              size="lg"
-            >
-              Explore Products
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-secondary border-secondary text-primary hover:bg-secondary/90"
-              size="lg"
-              onClick={handleContactSales}
-            >
-              Contact Sales
-            </Button>
-          </div>
+        </div>
+      </div>
+
+      {/* Push buttons to bottom */}
+      <div className="container mx-auto px-4 relative z-20 mb-16 flex-grow flex items-end justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={() => navigate('/products')}
+            className="bg-secondary text-primary hover:bg-secondary/90"
+            size="lg"
+          >
+            Explore Products
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-secondary border-secondary text-primary hover:bg-secondary/90"
+            size="lg"
+            onClick={handleContactSales}
+          >
+            Contact Sales
+          </Button>
         </div>
       </div>
     </div>
