@@ -6,7 +6,9 @@ import { HeroSettings } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection = () => {
-  const navigate = useNavigate();
+  // Initialize navigate with a fallback function to avoid errors when context isn't available
+  const navigate = useNavigate ? useNavigate() : (path: string) => { window.location.href = path; };
+  
   const [settings, setSettings] = useState<HeroSettings>({
     backgroundType: 'color',
     backgroundValue: '#0047AB'
@@ -55,7 +57,19 @@ const HeroSection = () => {
   }, []);
 
   const handleContactSales = () => {
-    navigate('/contact-options');
+    if (typeof navigate === 'function') {
+      navigate('/contact-options');
+    } else {
+      window.location.href = '/contact-options';
+    }
+  };
+
+  const handleExploreProducts = () => {
+    if (typeof navigate === 'function') {
+      navigate('/products');
+    } else {
+      window.location.href = '/products';
+    }
   };
 
   const getYoutubeId = (url: string): string => {
@@ -122,7 +136,7 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-20 mb-16 flex-grow flex items-end justify-center">
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
-            onClick={() => navigate('/products')}
+            onClick={handleExploreProducts}
             className="bg-secondary text-primary hover:bg-secondary/90"
             size="lg"
           >
