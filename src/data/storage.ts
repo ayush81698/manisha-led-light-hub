@@ -76,7 +76,6 @@ export async function deleteFile(bucketName: string, filePath: string): Promise<
   }
 }
 
-// Add the missing function that's causing the build error
 export async function ensureStorageBucketExists(bucketName: string = 'products'): Promise<boolean> {
   try {
     // Check if bucket exists
