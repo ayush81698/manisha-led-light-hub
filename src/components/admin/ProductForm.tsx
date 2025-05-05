@@ -211,13 +211,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel }
           title: "3D Model uploaded successfully",
           description: "The 3D model has been uploaded to the database.",
         });
-      } catch (error) {
-        console.error('Error uploading 3D model:', error);
-        toast({
-          title: "Upload failed",
-          description: `There was a problem uploading the 3D model: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          variant: "destructive"
-        });
+      }
       } finally {
         setUploading(false);
       }
