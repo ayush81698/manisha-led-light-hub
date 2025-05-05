@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { saveInquiry } from '@/data/products';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.phone || !formData.message) {
@@ -38,22 +38,49 @@ const Contact = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Save the general inquiry with a placeholder product ID
+      // We use a fixed product ID for general inquiries from the contact form
+      const generalInquiryProductId = '00000000-0000-0000-0000-000000000000';
+      const quantity = 1; // Default quantity for general inquiries
+      
+      const result = await saveInquiry(
+        generalInquiryProductId,
+        quantity,
+        formData.phone,
+        `Name: ${formData.name}, Email: ${formData.email}, Message: ${formData.message}`
+      );
+      
+      if (result) {
+        toast({
+          title: "Message Sent",
+          description: "Thank you for contacting us. We'll get back to you soon!",
+        });
+        
+        // Reset the form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: '',
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "There was a problem sending your message. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
       toast({
-        title: "Message Sent",
-        description: "Thank you for contacting us. We'll get back to you soon!",
+        title: "Error",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive"
       });
-      
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: '',
-      });
-      
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (

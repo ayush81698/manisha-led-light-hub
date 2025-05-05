@@ -5,16 +5,18 @@ import { toast } from '@/components/ui/use-toast';
 export async function createBucket(bucketName: string) {
   try {
     // Check if bucket already exists first
-    const { data: existingBucket } = await supabase.storage.getBucket(bucketName);
+    const { data: existingBucket, error: checkError } = await supabase.storage.getBucket(bucketName);
     
     // If bucket exists, return success
     if (existingBucket) {
+      console.log(`Bucket ${bucketName} already exists`);
       return true;
     }
     
     // Define the allowedMimeTypes with an explicit type
     const allowedMimeTypes: string[] = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
     
+    console.log(`Creating new bucket: ${bucketName}`);
     const { error } = await supabase.storage.createBucket(bucketName, {
       public: true,
       allowedMimeTypes: allowedMimeTypes,
@@ -23,10 +25,11 @@ export async function createBucket(bucketName: string) {
     
     if (error) {
       console.error('Error creating bucket:', error.message);
-      // Don't show error to the user, just log it
-      return true; // Return true anyway to prevent showing error messages
+      // Just log the error but don't prevent the app from working
+      return true;
     }
     
+    console.log(`Successfully created bucket: ${bucketName}`);
     return true;
   } catch (error) {
     console.error('Exception creating bucket:', error);
@@ -39,11 +42,12 @@ export async function uploadFile(bucketName: string, filePath: string, file: Fil
     // Ensure bucket exists before uploading
     await ensureStorageBucketExists(bucketName);
     
+    console.log(`Uploading file to ${bucketName}/${filePath}`);
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true // Changed to true to overwrite existing files with same name
+        upsert: true // Use upsert to replace existing files
       });
     
     if (error) {
@@ -51,6 +55,7 @@ export async function uploadFile(bucketName: string, filePath: string, file: Fil
       return null;
     }
     
+    console.log(`Successfully uploaded file to ${bucketName}/${filePath}`);
     return data;
   } catch (error) {
     console.error('Exception uploading file:', error);
@@ -91,11 +96,13 @@ export async function deleteFile(bucketName: string, filePath: string): Promise<
 
 export async function ensureStorageBucketExists(bucketName: string = 'products'): Promise<boolean> {
   try {
+    console.log(`Checking if bucket exists: ${bucketName}`);
     // Check if bucket exists
     const { data, error } = await supabase.storage.getBucket(bucketName);
     
     if (error) {
       if (error.message.includes('not found')) {
+        console.log(`Bucket ${bucketName} not found, creating it`);
         // Create the bucket if it doesn't exist
         return await createBucket(bucketName);
       } else {
@@ -105,6 +112,7 @@ export async function ensureStorageBucketExists(bucketName: string = 'products')
       }
     }
     
+    console.log(`Bucket ${bucketName} exists`);
     return true; // Bucket already exists
   } catch (error) {
     console.error('Exception checking/creating bucket:', error);

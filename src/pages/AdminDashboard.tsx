@@ -262,6 +262,7 @@ const AdminDashboard = () => {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
@@ -276,6 +277,15 @@ const AdminDashboard = () => {
                             <Badge className={getStatusColor(inquiry.status)}>
                               {inquiry.status}
                             </Badge>
+                          </td>
+                          <td className="px-4 py-4 dark:text-white">
+                            {inquiry.notes && (
+                              <div className="max-w-xs overflow-hidden text-ellipsis">
+                                {inquiry.notes.length > 50 
+                                  ? `${inquiry.notes.substring(0, 50)}...` 
+                                  : inquiry.notes}
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex space-x-2">
