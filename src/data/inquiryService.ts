@@ -33,15 +33,12 @@ export async function fetchInquiries() {
 
 export async function saveInquiry(productId: string | null, quantity: number, phone: string, notes?: string) {
   try {
-    // Default to null for general inquiries
-    const product_id = productId || null;
-    
-    console.log("Saving inquiry with data:", { product_id, quantity, phone, notes });
+    console.log("Saving inquiry with data:", { productId, quantity, phone, notes });
     
     const { data, error } = await supabase
       .from('inquiries')
       .insert({
-        product_id: product_id,
+        product_id: productId, // This can now be null for general inquiries
         quantity,
         phone,
         notes,

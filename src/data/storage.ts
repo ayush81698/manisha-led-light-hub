@@ -16,7 +16,7 @@ export async function createBucket(bucketName: string) {
     // If there was an error checking the bucket but it's not because it doesn't exist,
     // just log it and return success to allow the app to continue functioning
     if (checkError && !checkError.message.includes('not found')) {
-      console.log(`Error checking bucket ${bucketName}, assuming it exists:`, checkError.message);
+      console.log(`Error checking bucket ${bucketName}, but continuing:`, checkError.message);
       return true;
     }
     
@@ -31,15 +31,15 @@ export async function createBucket(bucketName: string) {
     });
     
     if (error) {
-      console.log('Error creating bucket, continuing anyway:', error.message);
-      // Just log the error but don't prevent the app from working
+      console.log('Error creating bucket, but continuing:', error.message);
+      // Return success anyways to prevent blocking the UI
       return true;
     }
     
     console.log(`Successfully created bucket: ${bucketName}`);
     return true;
   } catch (error) {
-    console.log('Exception creating bucket, continuing anyway:', error);
+    console.log('Exception creating bucket, but continuing:', error);
     return true; // Return true anyway to prevent showing error messages
   }
 }
@@ -58,16 +58,16 @@ export async function uploadFile(bucketName: string, filePath: string, file: Fil
       });
     
     if (error) {
-      console.log('Error uploading file, continuing anyway:', error.message);
-      // Try to get a public URL even if upload failed - might be using an existing file
+      console.log('Error uploading file:', error.message);
+      // Attempt to get a public URL even if upload failed - might be using an existing file
       return getFileUrl(bucketName, filePath);
     }
     
     console.log(`Successfully uploaded file to ${bucketName}/${filePath}`);
     return getFileUrl(bucketName, filePath);
   } catch (error) {
-    console.log('Exception uploading file, continuing anyway:', error);
-    // Try to get a public URL even if upload failed - might be using an existing file
+    console.log('Exception uploading file:', error);
+    // Attempt to get a public URL even if upload failed - might be using an existing file
     return getFileUrl(bucketName, filePath);
   }
 }
@@ -92,14 +92,14 @@ export async function deleteFile(bucketName: string, filePath: string): Promise<
       .remove([filePath]);
     
     if (error) {
-      console.log('Error deleting file, continuing anyway:', error.message);
-      return true; // Return success anyway to prevent breaking the app
+      console.log('Error deleting file:', error.message);
+      return false;
     }
     
     return true;
   } catch (error) {
-    console.log('Exception deleting file, continuing anyway:', error);
-    return true; // Return success anyway to prevent breaking the app
+    console.log('Exception deleting file:', error);
+    return false;
   }
 }
 
@@ -111,11 +111,11 @@ export async function ensureStorageBucketExists(bucketName: string = 'products')
     
     if (error) {
       if (error.message.includes('not found')) {
-        console.log(`Bucket ${bucketName} not found, but continuing anyway`);
-        return true; // Return true to allow the app to continue functioning
+        // If bucket doesn't exist, create it
+        return createBucket(bucketName);
       } else {
         // For other errors, log but don't show to user
-        console.log('Error checking bucket, continuing anyway:', error.message);
+        console.log('Error checking bucket:', error.message);
         return true; // Return true anyway to prevent showing error messages
       }
     }
@@ -123,7 +123,7 @@ export async function ensureStorageBucketExists(bucketName: string = 'products')
     console.log(`Bucket ${bucketName} exists`);
     return true; // Bucket already exists
   } catch (error) {
-    console.log('Exception checking bucket, continuing anyway:', error);
+    console.log('Exception checking bucket:', error);
     return true; // Return true anyway to prevent showing error messages
   }
 }
