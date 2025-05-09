@@ -14,7 +14,7 @@ const About = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
         <div>
           <img 
-            src="/placeholder.svg" 
+            src="https://vuocrrpygfcasvvgwnaf.supabase.co/storage/v1/object/public/product-models//me2.jpg" 
             alt="Company Facility" 
             className="rounded-lg shadow-lg w-full h-full object-cover"
           />
