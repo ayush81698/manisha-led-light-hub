@@ -9,16 +9,16 @@ const ContactOptions = () => {
   const navigate = useNavigate();
   
   const handlePhoneCall = () => {
-    const phoneNumber = '+919876543210';
+    const phoneNumber = '+919833591641';
     window.location.href = `tel:${phoneNumber}`;
   };
   
   const handleEmail = () => {
-    window.location.href = 'mailto:sales@manishaenterprises.com';
+    window.location.href = 'mailto:info@manisha-enterprises.com';
   };
   
   const handleWhatsApp = () => {
-    const phoneNumber = '919876543210';
+    const phoneNumber = '+919833591641';
     const message = 'Hello, I am interested in your LED light housings.';
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
