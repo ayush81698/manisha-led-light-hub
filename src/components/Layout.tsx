@@ -95,7 +95,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div>
               <h3 className="font-bold text-lg mb-4">Manisha Enterprises</h3>
               <p className="text-gray-300">Premium LED Housing Manufacturer</p>
-              <p className="text-gray-300 mt-2">Since 2005</p>
+              <p className="text-gray-300 mt-2">Since 1982</p>
             </div>
             
             <div>
