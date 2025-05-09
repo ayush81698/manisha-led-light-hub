@@ -214,7 +214,7 @@ const Contact = () => {
                 <div>
                   <h3 className="font-bold mb-2">Factory & Office</h3>
                   <p className="text-gray-600">
-                    123 Industrial Area, <br />
+                    vasai Industrial Area, <br />
                     Mumbai, Maharashtra 400001, <br />
                     India
                   </p>
