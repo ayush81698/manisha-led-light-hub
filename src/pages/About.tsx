@@ -77,38 +77,6 @@ const About = () => {
           </Card>
         </div>
       </div>
-      
-      <div>
-        <h2 className="text-2xl font-bold text-center mb-8 text-primary">Our Certifications</h2>
-        <div className="bg-gray-50 p-8 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md mb-4">
-                <span className="text-3xl font-bold text-primary">ISO</span>
-              </div>
-              <span className="text-center">ISO 9001:2015</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md mb-4">
-                <span className="text-3xl font-bold text-primary">CE</span>
-              </div>
-              <span className="text-center">CE Certified</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md mb-4">
-                <span className="text-3xl font-bold text-primary">RoHS</span>
-              </div>
-              <span className="text-center">RoHS Compliant</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md mb-4">
-                <span className="text-3xl font-bold text-primary">BIS</span>
-              </div>
-              <span className="text-center">BIS Certified</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
