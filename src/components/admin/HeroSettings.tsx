@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,13 +19,14 @@ const HeroSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMode, setSaveMode] = useState<'both' | 'local'>('both');
   const [dbError, setDbError] = useState<string | null>(null);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const { data: settingsData, error } = await supabase
           .from('settings')
-          .select('value')
+          .select('id, value')
           .eq('name', 'heroSettings')
           .maybeSingle();
           
@@ -40,7 +40,10 @@ const HeroSettings = () => {
           if (savedSettings) {
             setSettings(JSON.parse(savedSettings));
           }
-        } else if (settingsData?.value) {
+        } else if (settingsData) {
+          // Store the ID for updates
+          setSettingsId(settingsData.id);
+          
           // Cast to unknown first, then to the expected type
           const parsedSettings = settingsData.value as unknown as HeroSettingsType;
           
@@ -97,12 +100,53 @@ const HeroSettings = () => {
       // Only attempt to save to database if in 'both' mode
       if (saveMode === 'both') {
         console.log("Saving settings to Supabase:", finalSettings);
-        const { error } = await supabase
-          .from('settings')
-          .upsert({
-            name: 'heroSettings',
-            value: finalSettings as unknown as Json
-          });
+        let error;
+        
+        if (settingsId) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('settings')
+            .update({
+              value: finalSettings as unknown as Json,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', settingsId);
+          
+          error = updateError;
+        } else {
+          // Check if the setting already exists with a different ID
+          const { data: existingSettings } = await supabase
+            .from('settings')
+            .select('id')
+            .eq('name', 'heroSettings')
+            .maybeSingle();
+            
+          if (existingSettings) {
+            // Update if exists
+            const { error: updateError } = await supabase
+              .from('settings')
+              .update({
+                value: finalSettings as unknown as Json,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingSettings.id);
+            
+            error = updateError;
+            if (!error) {
+              setSettingsId(existingSettings.id);
+            }
+          } else {
+            // Insert new record
+            const { error: insertError } = await supabase
+              .from('settings')
+              .insert({
+                name: 'heroSettings',
+                value: finalSettings as unknown as Json
+              });
+            
+            error = insertError;
+          }
+        }
 
         if (error) {
           console.error('Error saving settings to DB:', error);

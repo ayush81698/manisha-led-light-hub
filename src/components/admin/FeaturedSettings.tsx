@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,13 +19,14 @@ const FeaturedSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMode, setSaveMode] = useState<'both' | 'local'>('both');
   const [dbError, setDbError] = useState<string | null>(null);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const { data: settingsData, error } = await supabase
           .from('settings')
-          .select('value')
+          .select('id, value')
           .eq('name', 'featuredSettings')
           .maybeSingle();
           
@@ -40,7 +40,10 @@ const FeaturedSettings = () => {
           if (savedSettings) {
             setSettings(JSON.parse(savedSettings));
           }
-        } else if (settingsData?.value) {
+        } else if (settingsData) {
+          // Store the ID for updates
+          setSettingsId(settingsData.id);
+          
           // Cast to unknown first, then to the expected type
           const parsedSettings = settingsData.value as unknown as SectionSettings;
           
@@ -97,36 +100,52 @@ const FeaturedSettings = () => {
       // Only try to save to database if we don't have a known error
       if (saveMode === 'both') {
         console.log("Saving settings to Supabase:", finalSettings);
-        
-        // First check if the settings entry already exists
-        const { data: existingSettings } = await supabase
-          .from('settings')
-          .select('id')
-          .eq('name', 'featuredSettings')
-          .maybeSingle();
-        
         let error;
         
-        if (existingSettings) {
-          // Update existing setting
-          const updateResult = await supabase
+        if (settingsId) {
+          // Update existing record
+          const { error: updateError } = await supabase
             .from('settings')
             .update({
-              value: finalSettings as unknown as Json
+              value: finalSettings as unknown as Json,
+              updated_at: new Date().toISOString()
             })
-            .eq('name', 'featuredSettings');
+            .eq('id', settingsId);
           
-          error = updateResult.error;
+          error = updateError;
         } else {
-          // Insert new setting
-          const insertResult = await supabase
+          // Check if the setting already exists with a different ID
+          const { data: existingSettings } = await supabase
             .from('settings')
-            .insert({
-              name: 'featuredSettings',
-              value: finalSettings as unknown as Json
-            });
-          
-          error = insertResult.error;
+            .select('id')
+            .eq('name', 'featuredSettings')
+            .maybeSingle();
+            
+          if (existingSettings) {
+            // Update if exists
+            const { error: updateError } = await supabase
+              .from('settings')
+              .update({
+                value: finalSettings as unknown as Json,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingSettings.id);
+            
+            error = updateError;
+            if (!error) {
+              setSettingsId(existingSettings.id);
+            }
+          } else {
+            // Insert new record
+            const { error: insertError } = await supabase
+              .from('settings')
+              .insert({
+                name: 'featuredSettings',
+                value: finalSettings as unknown as Json
+              });
+            
+            error = insertError;
+          }
         }
 
         if (error) {
