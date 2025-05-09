@@ -22,7 +22,7 @@ const About = () => {
         <div className="flex flex-col justify-center">
           <h2 className="text-2xl font-bold mb-4 text-primary">Our Story</h2>
           <p className="text-gray-700 mb-4">
-            Founded in 2005, Manisha Enterprises has grown from a small workshop to a leading manufacturer of LED light housings. Our journey began with a simple vision: to create high-quality, durable products that meet the evolving needs of the lighting industry.
+            Founded in 1982, Manisha Enterprises has grown from a small workshop to a leading manufacturer of LED light housings. Our journey began with a simple vision: to create high-quality, durable products that meet the evolving needs of the lighting industry.
           </p>
           <p className="text-gray-700 mb-4">
             Today, we serve clients across various industries, from commercial lighting to industrial applications, with a focus on innovation, quality, and exceptional service.
