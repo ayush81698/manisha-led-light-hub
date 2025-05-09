@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { saveInquiry } from '@/data/inquiryService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const Contact = () => {
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -22,12 +25,18 @@ const Contact = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user starts typing again
+    if (formError) {
+      setFormError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+      setFormError("Please fill in all fields");
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -37,11 +46,12 @@ const Contact = () => {
     }
     
     setIsSubmitting(true);
+    setFormError(null);
     
     try {
       // Use null for product_id to indicate a general inquiry
       const result = await saveInquiry(
-        null, // Pass null instead of a placeholder UUID
+        null, // This will now be handled with a default UUID in the service
         1, // Default quantity for general inquiries
         formData.phone,
         `Name: ${formData.name}, Email: ${formData.email}, Message: ${formData.message}`
@@ -61,6 +71,7 @@ const Contact = () => {
           message: '',
         });
       } else {
+        setFormError("There was a problem sending your message. Please try again.");
         toast({
           title: "Error",
           description: "There was a problem sending your message. Please try again.",
@@ -69,6 +80,7 @@ const Contact = () => {
       }
     } catch (error) {
       console.error("Error submitting contact form:", error);
+      setFormError("There was a problem sending your message. Please try again.");
       toast({
         title: "Error",
         description: "There was a problem sending your message. Please try again.",
@@ -95,8 +107,8 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-bold mb-2">Phone</h3>
-                <p className="text-gray-600 mb-1">Sales: +91 9833591641</p>
-                <p className="text-gray-600">Support: +91 9833591641</p>
+                <p className="text-gray-600 mb-1">Sales: +91 9833591642</p>
+                <p className="text-gray-600">Support: +91 9833591642</p>
               </div>
             </div>
           </CardContent>
@@ -136,6 +148,11 @@ const Contact = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <div>
           <h2 className="text-2xl font-bold mb-6 text-primary">Get In Touch</h2>
+          {formError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>

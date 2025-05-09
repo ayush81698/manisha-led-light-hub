@@ -35,10 +35,14 @@ export async function saveInquiry(productId: string | null, quantity: number, ph
   try {
     console.log("Saving inquiry with data:", { productId, quantity, phone, notes });
     
+    // For general inquiries, set a default UUID instead of null
+    const generalInquiryId = '00000000-0000-0000-0000-000000000000';
+    const actualProductId = productId || generalInquiryId;
+    
     const { data, error } = await supabase
       .from('inquiries')
       .insert({
-        product_id: productId, // This can now be null for general inquiries
+        product_id: actualProductId,
         quantity,
         phone,
         notes,
