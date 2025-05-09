@@ -120,7 +120,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <h3 className="font-bold text-lg mb-4">Contact</h3>
               <p className="text-gray-300">vasai Industrial Area,</p>
               <p className="text-gray-300">Maharashtra, India</p>
-              <p className="text-gray-300">+91 9833591642</p>
+              <p className="text-gray-300">+91 9833591641</p>
               <p className="text-gray-300">info@manisha-enterprises.com</p>
             </div>
           </div>
