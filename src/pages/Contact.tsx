@@ -95,8 +95,8 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-bold mb-2">Phone</h3>
-                <p className="text-gray-600 mb-1">Sales: +91 9876543210</p>
-                <p className="text-gray-600">Support: +91 9876543211</p>
+                <p className="text-gray-600 mb-1">Sales: +91 9833591641</p>
+                <p className="text-gray-600">Support: +91 9833591641</p>
               </div>
             </div>
           </CardContent>
@@ -110,8 +110,8 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-bold mb-2">Email</h3>
-                <p className="text-gray-600 mb-1">Sales: sales@manishaenterprises.com</p>
-                <p className="text-gray-600">Support: support@manishaenterprises.com</p>
+                <p className="text-gray-600 mb-1">Sales: info@manisha-enterprises.com</p>
+                <p className="text-gray-600">Support: info@manisha-enterprises.com</p>
               </div>
             </div>
           </CardContent>
