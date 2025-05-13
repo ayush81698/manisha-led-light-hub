@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import FlipProductCard from '@/components/products/FlipProductCard';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
+import { Helmet } from 'react-helmet-async';
 
 const ProductCatalog = () => {
   const navigate = useNavigate();
@@ -109,15 +110,21 @@ const ProductCatalog = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Product Catalog</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">Explore our range of premium LED light housings</p>
+      <Helmet>
+        <title>LED Street Light Housings Catalog - Manisha Enterprises</title>
+        <meta name="description" content="Browse our complete catalog of LED street light housings, indoor and outdoor LED fixtures, and custom lighting enclosures for commercial and industrial applications." />
+        <link rel="canonical" href="https://manisha-enterprises.com/products" />
+      </Helmet>
+
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">LED Light Housing Catalog</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300 text-center">Explore our range of premium LED light housings for street lights, commercial fixtures, and custom applications</p>
       </div>
       
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 dark:text-white">Filters</h3>
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">Filters</h2>
             
             <div className="mb-6">
               <h4 className="font-medium mb-2 dark:text-white">Wattage</h4>
@@ -196,11 +203,19 @@ const ProductCatalog = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map(product => (
-                <FlipProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4 dark:text-white">Available LED Housing Products</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Our LED housings are designed for durability, optimal heat dissipation, and easy installation. Ideal for street lights, commercial lighting, and industrial applications.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map(product => (
+                  <FlipProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

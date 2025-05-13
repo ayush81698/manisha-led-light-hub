@@ -2,6 +2,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
+import { HelmetProvider } from 'react-helmet-async';
 import Layout from '@/components/Layout';
 import Index from '@/pages/Index';
 import ProductCatalog from '@/pages/ProductCatalog';
@@ -25,31 +26,33 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/products" element={<ProductCatalog />} />
-            <Route path="/products/:productId" element={<ProductDetail />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
-              } 
-            />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/contact-options" element={<ContactOptions />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-        <Toaster />
-      </Router>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/products" element={<ProductCatalog />} />
+              <Route path="/products/:productId" element={<ProductDetail />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminDashboard />
+                  </ProtectedAdminRoute>
+                } 
+              />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/contact-options" element={<ContactOptions />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+          <Toaster />
+        </Router>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
