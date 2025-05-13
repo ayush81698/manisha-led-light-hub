@@ -231,8 +231,8 @@ const Contact = () => {
                 <div>
                   <h3 className="font-bold mb-2">Factory & Office</h3>
                   <p className="text-gray-600">
-                    vasai Industrial Area, <br />
-                    Mumbai, Maharashtra 400001, <br />
+                    gala no. 107/108 rajprabha udyog, <br />
+                    golani naka vasai(E), palghar-401208, <br />
                     India
                   </p>
                 </div>
