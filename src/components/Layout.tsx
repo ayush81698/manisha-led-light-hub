@@ -118,8 +118,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             
             <div>
               <h3 className="font-bold text-lg mb-4">Contact</h3>
-              <p className="text-gray-300">vasai Industrial Area,</p>
-              <p className="text-gray-300">Maharashtra, India</p>
+              <p className="text-gray-300">Gala no 107/108, rajprabha Udyog</p>
+              <p className="text-gray-300"> golani-naka, waliv, vasai(E),Palghar-401280.</p>
               <p className="text-gray-300">+91 9833591641</p>
               <p className="text-gray-300">info@manisha-enterprises.com</p>
             </div>
