@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { ChevronLeft, ChevronRight, Loader, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductModelViewer } from '@/components/ProductModelViewer';
 import { HamsterLoader } from '@/components/ui/hamster-loader';
-import SEOProductSchema from '@/components/SEOProductSchema';
 import { 
   Carousel,
   CarouselContent,
@@ -256,8 +254,6 @@ const ProductDetail = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      {product && <SEOProductSchema product={product} />}
-      
       <Button 
         variant="outline" 
         onClick={() => navigate('/products')}
